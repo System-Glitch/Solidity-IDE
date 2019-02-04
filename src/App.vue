@@ -1,28 +1,29 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+    <div id="app" class="h-100 d-flex flex-column">
+        <div class="w-100 flex-grow-1 d-flex flex-nowrap">
+            <editor/>
+            <sidebar/>
+        </div>
+        <div class="w-100">
+            <contracts/>
+        </div>
+    </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+    import Sidebar from './components/Sidebar.vue'
+    import Contracts from './components/Contracts.vue'
+    import Editor from './components/Editor.vue'
 
-export default {
-  name: 'app',
-  components: {
-    HelloWorld
-  }
+    export default {
+        name: 'app',
+        components: {
+            "sidebar": Sidebar,
+            "editor": Editor,
+            "contracts": Contracts,
+        }
 }
 </script>
-
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style scoped lang="scss">
+@import 'sass/app.scss'
 </style>

@@ -1,0 +1,135 @@
+
+// Fonts
+@import url('https://fonts.googleapis.com/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+body, html {
+    height: 100%;
+}
+
+.monospace {
+    font-family: 'Roboto Mono', monospace !important;
+}
+
+.ace_editor {
+    font-size: 14px !important;
+}
+
+.form-control-sm {
+    height: calc(1.68125rem + 2px) !important;
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.7875rem;
+    line-height: 1.5 !important;
+    border-radius: 0.2rem !important;
+}
+
+.scrollable {
+    overflow-y: scroll;
+}
+
+.fit-parent, .fit-parent .tab-content {
+    height: 100%;
+    overflow: hidden;
+}
+
+.table-fixed {
+    table-layout: fixed;
+}
+
+.table-fit {
+    width: 40px;
+}
+
+.table-container td {
+    font-size: 12px;
+}
+
+.table-container table {
+    margin: 0;
+}
+
+.table-container .table th {
+    position: sticky;
+    top: 0;
+    border: 0;
+    z-index: 2;
+}
+
+.table-container .table-header th:after, .table-container .table-header th:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    width: 100%;
+}
+
+.table-container .table-header th:before {
+    top: 0;
+    border-top: 1px solid #32383e;
+}
+
+.table-container .table-header th:after {
+    top: 100%;
+    border-bottom: 1px solid #32383e;
+}
+
+.bottom-separator {
+    border-bottom: 1px solid #444;
+}
+
+.bg-dark {
+    color: #fff;
+}
+
+.bg-dark textarea:focus {
+    color: #fff;
+}
+
+.bg-dark .nav-tabs .nav-link, .bg-dark .nav-tabs .nav-link {
+    color: #ddd;
+}
+
+.bg-dark .nav-tabs .nav-link:hover, .bg-dark .nav-tabs .nav-link:focus {
+    border-color: #878787;
+    color: #fff;
+}
+
+.bg-dark .nav-tabs .nav-link.active, .bg-dark .nav-tabs .nav-item.show .nav-link {
+    color: #fff;
+    background-color: var(--dark);
+    border-color: #878787 #878787 var(--dark);
+}
+
+.bg-dark .nav-tabs .nav-link.disabled {
+    color: #7d7d7d;
+    background-color: #0000004d;
+    border-bottom-color: #878787;
+}
+
+.bg-dark .nav-tabs {
+    border-bottom: 1px solid #878787;
+}
+
+.alert-dismissible .close {
+    padding: 0 0.25rem !important;
+}
+
+.marker-error {
+    position: absolute;
+    border-bottom: 2px solid var(--danger);
+    z-index: 2;
+    opacity: 0.85;
+    border-radius: 0px;
+}
+
+.marker-warning {
+    position: absolute;
+    border-bottom: 2px solid var(--warning);
+    z-index: 2;
+    opacity: 0.85;
+    border-radius: 0px;
+}
