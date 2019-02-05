@@ -1,17 +1,20 @@
 <template>
     <div class="row fit-parent" id="contract-container">
         <div class="col-4 scrollable pt-2 pb-2 h-100">
-            <contract-action v-for="(method, index) in abi"  v-if="method.type == 'function'" :key="index" v-bind:method="method" class="mb-2 row" @method-run="run"/>
+            <contract-action v-for="(method, index) in filteredAbi" :key="index" v-bind:method="method" class="mb-2 row" @method-run="run"/>
         </div>
         
         <div class="col-8 p-0 h-100">
-            <div id="output" class="h-100 w-100 m-0"></div>
+            <div :id="'output-' + _uid" class="h-100 w-100 m-0"></div>
         </div>
     </div>
 </template>
 
 <script>
     import ContractAction from '../components/ContractAction.vue'
+    const ace = require('brace');
+    require('brace/mode/json');
+    require('brace/theme/tomorrow_night');
 
     export default {
         name: "contract",
@@ -26,6 +29,17 @@
             abi: {
                 type: Array,
                 required: true
+            }
+        },
+        computed: {
+            filteredAbi: function () {
+                const filteredAbi = [];
+                for(let key in this.abi) {
+                    const method = this.abi[key];
+                    if(method.type == 'function')
+                        filteredAbi[key] = method;
+                }
+                return filteredAbi;
             }
         },
         data: function() {
@@ -66,12 +80,11 @@
                 }
             }
         },
+        beforeDestroy() {
+            this.editor.destroy();
+        },
         mounted() {
-            const ace = require('brace');
-            require('brace/mode/json');
-            require('brace/theme/tomorrow_night');
-
-            this.editor = ace.edit('output');
+            this.editor = ace.edit('output-' +  this._uid);
             this.editor.getSession().setMode('ace/mode/json');
             this.editor.setTheme('ace/theme/tomorrow_night');
             this.editor.setOptions({

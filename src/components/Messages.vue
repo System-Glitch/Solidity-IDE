@@ -9,7 +9,7 @@
             </div>
             <div class="flex scrollable flex-grow-1">
                 <div class="col">
-                    <b-alert v-for="(message, index) in messages" :key="index" :variant="getVariant(message.severity)" show dismissible @dismissed="dismiss(index)" class="p-1 pr-4 mb-2">
+                    <b-alert v-for="(message, index) in messages" :key="index" :variant="getVariant(message.severity)" show dismissible class="p-1 pr-4 mb-2">
                         <div class="w-100 overflow-auto monospace">{{ message.formattedMessage }}</div>
                     </b-alert>
                 </div>
@@ -31,9 +31,6 @@
             },
             deploy: function() {
                 Event.$emit('deploy');
-            },
-            dismiss: function(index) {
-                this.messages.splice(index, 1);
             },
             getVariant: function(severity) {
                 switch(severity) {

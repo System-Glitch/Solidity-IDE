@@ -1,6 +1,6 @@
 <template>
-    <b-tabs class="w-100 bg-dark d-flex flex-column fit-parent" id="contracts-container">
-        <b-tab v-for="(contract, index) in contracts" :key="index" class="container-fluid fit-parent">
+    <b-tabs class="w-100 bg-dark d-flex flex-column fit-parent" id="contracts-container" no-fade>
+        <b-tab v-for="(contract, index) in contracts" :key="index" class="container-fluid fit-parent" :active="index == contracts.length - 1">
             <template slot="title">
                 <span>{{ contract.name }}</span><button class="ml-1 close text-light" type="button" @click="dismiss(index)">×</button>
             </template>
@@ -19,7 +19,8 @@
         },
         data: function() {
             return {
-                contracts: []
+                contracts: [],
+                counter: 0
             }
         },
         methods: {
