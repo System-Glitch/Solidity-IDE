@@ -4,8 +4,8 @@
             <contract-action v-for="(method, index) in abi"  v-if="method.type == 'function'" :key="index" v-bind:method="method" class="mb-2 row" @method-run="run"/>
         </div>
         
-        <div class="col-8 p-0 scrollable h-100">
-            <div id="output" class="h-100 w-100 m-0" :no-resize="true"></div>
+        <div class="col-8 p-0 h-100">
+            <div id="output" class="h-100 w-100 m-0"></div>
         </div>
     </div>
 </template>

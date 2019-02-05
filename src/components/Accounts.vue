@@ -12,7 +12,7 @@
                     <tr class="table-header">
                         <th class="table-fit bg-dark"></th>
                         <th class="bg-dark">Account</th>
-                        <th class="bg-dark">Balance</th>
+                        <th class="bg-dark balance-cell">Balance</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,7 +44,7 @@
             }
         },
         methods: {
-            updateAccounts: function() {
+            updateAccounts: function(callback) {
                 web3.eth.getAccounts().then(function(accounts) {
                     const temp = [];
                     for(let key in accounts) {
@@ -57,26 +57,40 @@
                         accountManager.selectedAccount = 0;
                     }
                     accountManager.accounts = temp;
+
+                    if(callback != undefined) {
+                        callback();
+                    }
                 }.bind(this));
             },
-            updateAccount: function(account) {
+            updateAccount: function(account, callback) {
                 web3.eth.getBalance(account).then(function(balance) {
                     accountManager.find(account).balance = web3.utils.fromWei(balance.toString(), "ether").toString();
+
+                    if(callback != undefined) {
+                        callback();
+                    }
                 });
             }
         },
         mounted() {
             this.updateAccounts();
 
-            Event.$on('refreshAccounts', (accounts) => {
+            Event.$on('refreshAccounts', (accounts, callback) => {
                 if(accounts == "all") {
-                    this.updateAccounts();
+                    this.updateAccounts(callback);
                 } else {
                     for(let i = 0 ; i < accounts.length ; i++) {
-                        this.updateAccount(accounts[i]);
+                        this.updateAccount(accounts[i], callback);
                     }
                 }
+
             });
         }
     }
 </script>
+<style scoped>
+    .balance-cell {
+        width: 125px;
+    }
+</style>

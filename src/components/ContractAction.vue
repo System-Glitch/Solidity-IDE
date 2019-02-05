@@ -1,6 +1,8 @@
 <template>
-            <div class="mb-2 row">
-                <button class="btn btn-sm col-6" v-bind:class="method.payable ? 'btn-info' : 'btn-secondary'" @click="run()">{{ method.name }}</button>
+            <div class="mb-2 mx-auto input-group">
+                <div class="input-group-prepend col-6 p-0">
+                    <button class="btn btn-sm btn-block" v-bind:class="method.payable ? 'btn-info' : 'btn-secondary'" @click="run()">{{ method.name }}</button>
+                </div>
                 <b-form-input :disabled="method.payable !== true" class="col-3 form-control-sm bg-light"
                       type="number"
                       required

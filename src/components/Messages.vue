@@ -9,7 +9,7 @@
             </div>
             <div class="flex scrollable flex-grow-1">
                 <div class="col">
-                    <b-alert v-for="(message, index) in messages" :key="index" :variant="getVariant(message.severity)" show dismissible @dismissed="dismiss(index)" class="p-1 pr-4">
+                    <b-alert v-for="(message, index) in messages" :key="index" :variant="getVariant(message.severity)" show dismissible @dismissed="dismiss(index)" class="p-1 pr-4 mb-2">
                         <div class="w-100 overflow-auto monospace">{{ message.formattedMessage }}</div>
                     </b-alert>
                 </div>

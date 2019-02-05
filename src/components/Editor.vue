@@ -49,6 +49,25 @@
                     Event.$emit('messages', [{severity: 'error', formattedMessage: "Compilation request failed with status " + jqXHR.status + ": " + jqXHR.responseText }]);
                 });
             },
+            deploy: function(contractName, compiledContract) {
+                const contract = new web3.eth.Contract(compiledContract.abi);
+                const activeAccount = accountManager.getActiveAccount();
+                contract.deploy({
+                    data: compiledContract.evm.bytecode.object,
+                }).send({
+                    from: activeAccount.address,
+                    gas: '4700000',
+                }).then((contract) => {
+                    if (typeof contract.options !== 'undefined') {
+                        console.log('Contract mined! address: ' + contract.options.address);
+                        Event.$emit('message', {severity: 'success', formattedMessage: "Deploy success."});
+                        Event.$emit('contract', {contract: contract, abi: compiledContract.abi, name: contractName});
+                        Event.$emit('refreshAccounts', [activeAccount.address]);
+                    }
+                }).catch((error) => {
+                    Event.$emit('message', [{severity: 'error', formattedMessage: "Deploy failed: " + error.message}]);
+                });
+            },
             save: function() {
                 localStorage['contract.sol'] = this.editor.getValue(); // TODO handle multiple files
             },
@@ -144,24 +163,16 @@
 
             Event.$on('deploy', () => {
                 this.compile(function(contractName, compiledContract) {
-                    const contract = new web3.eth.Contract(compiledContract.abi);
-                    const activeAccount = accountManager.getActiveAccount();
-                    contract.deploy({
-                        data: compiledContract.evm.bytecode.object,
-                    }).send({
-                        from: activeAccount.address,
-                        gas: '4700000',
-                    }).then((contract) => {
-                        if (typeof contract.options !== 'undefined') {
-                            console.log('Contract mined! address: ' + contract.options.address);
-                            Event.$emit('message', {severity: 'success', formattedMessage: "Deploy success."});
-                            Event.$emit('contract', {contract: contract, abi: compiledContract.abi, name: contractName});
-                            Event.$emit('refreshAccounts', [activeAccount.address]);
-                        }
-                    }).catch((error) => {
-                        Event.$emit('message', [{severity: 'error', formattedMessage: "Deploy failed: " + error.message}]);
-                    });
-                });
+
+                    if(accountManager.selectedAccount == -1) { // Fetch accounts if missing
+                        Event.$emit('refreshAccounts', 'all', () => {
+                            this.deploy(contractName, compiledContract);
+                        });
+                    } else {
+                        this.deploy(contractName, compiledContract);
+                    }
+
+                }.bind(this));
             });
 
             this.load('contract.sol');  // TODO handle multiple files
