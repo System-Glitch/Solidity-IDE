@@ -7,10 +7,9 @@
 ## Install
 
 **Option 1:** Download the latest [release](https://github.com/System-Glitch/Solidity-IDE/releases).  
-**Option 2:** Clone the repository and run `npm install`. On windows, you may need to have Visual C++ installed.  
+**Option 2:** Clone the repository and run `npm install && npm run build-local`. On windows, you may need to have Visual C++ installed.  
 
 ```
-npm run build-local
 npm run ide
 ```
 
