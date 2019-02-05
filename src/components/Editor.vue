@@ -37,7 +37,7 @@
                         Event.$emit('messages', data.errors);
                         this.editor.getSession().setAnnotations(this.buildAnnotations(data.errors));
                     } else {
-                        Event.$emit('messages', [{severity: 'success', formattedMessage: "Compilation success."}]);
+                        Event.$emit('messages', [{severity: 'success', formattedMessage: "Compilation successful."}]);
                         if(callback != undefined) {
                             for(let key in data.contracts.title) {
                                 callback(key, data.contracts.title[key]);
@@ -45,8 +45,8 @@
                         }
                     }
                 }.bind(this))
-                .fail(function() {
-                    console.log("Compilation request failed.");
+                .fail(function( jqXHR, textStatus ) {
+                    Event.$emit('messages', [{severity: 'error', formattedMessage: "Compilation request failed with status " + jqXHR.status + ": " + jqXHR.responseText }]);
                 });
             },
             save: function() {
@@ -154,9 +154,12 @@
                     }).then((contract) => {
                         if (typeof contract.options !== 'undefined') {
                             console.log('Contract mined! address: ' + contract.options.address);
+                            Event.$emit('message', {severity: 'success', formattedMessage: "Deploy success."});
                             Event.$emit('contract', {contract: contract, abi: compiledContract.abi, name: contractName});
                             Event.$emit('refreshAccounts', [activeAccount.address]);
                         }
+                    }).catch((error) => {
+                        Event.$emit('message', [{severity: 'error', formattedMessage: "Deploy failed: " + error.message}]);
                     });
                 });
             });

@@ -48,6 +48,9 @@
             Event.$on('messages', (messages) => {
                 this.messages = messages;
             });
+            Event.$on('message', (message) => {
+                this.messages.push(message);
+            });
         }
     }
 </script>
