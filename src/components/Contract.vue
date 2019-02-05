@@ -45,6 +45,10 @@
                     .then((result) => {
                         this.editor.getSession().setMode('ace/mode/json');
                         this.editor.setValue(JSON.stringify(result, null, 4));
+                    })
+                    .catch((error) => {
+                        this.editor.getSession().setMode(null);
+                        this.editor.setValue(error.message);
                     });
                 } else {
                     method().send({value: data.amount, from: activeAccount.address})
