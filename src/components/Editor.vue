@@ -59,8 +59,7 @@
                     gas: '4700000',
                 }).then((contract) => {
                     if (typeof contract.options !== 'undefined') {
-                        console.log('Contract mined! address: ' + contract.options.address);
-                        Event.$emit('message', {severity: 'success', formattedMessage: "Deploy success."});
+                        Event.$emit('message', {severity: 'success', formattedMessage: "Deploy success.\nContract address: " + contract.options.address});
                         Event.$emit('contract', {contract: contract, abi: compiledContract.abi, name: contractName});
                         Event.$emit('refreshAccounts', [activeAccount.address]);
                     }
