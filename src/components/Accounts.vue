@@ -1,6 +1,6 @@
 <template>
     <div class="d-flex flex-column h-50 bg-dark bottom-separator">
-        <div class="p-2 d-flex flex-horizontal justify-content-between align-items-center scrollable flex-shrink-0">
+        <div class="p-2 d-flex flex-horizontal justify-content-between align-items-center flex-shrink-0">
             <h5 class="m-0 d-inline-block">Accounts</h5>
             <div>
                 <button class="btn btn-success btn-sm" @click="updateAccounts()">Refresh</button>
@@ -18,7 +18,10 @@
                 <tbody>
                     <tr v-for="(account, index) in accountManager.accounts" v-bind:key="account.address">
                         <td class="align-middle text-center table-fit p-0">
-                            <input type="radio" class="align-middle" name="active-account" :value="index" v-model="accountManager.selectedAccount">
+                            <div class="custom-control custom-radio">
+                                <input type="radio" class="align-middle m-0 custom-control-input" name="active-account"  :id="'account-radio-' + index" :value="index" v-model="accountManager.selectedAccount">
+                                <label class="custom-control-label" :for="'account-radio-' + index"></label>
+                            </div>
                         </td>
                         <td class="align-middle" :title="account.address">
                             <div class="text-nowrap text-truncate">

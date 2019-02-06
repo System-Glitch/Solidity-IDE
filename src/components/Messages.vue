@@ -1,6 +1,6 @@
 <template>
         <div class="d-flex flex-column h-50 bg-dark bottom-separator">
-            <div class="p-2 d-flex flex-horizontal justify-content-between align-items-center scrollable flex-shrink-0">
+            <div class="p-2 d-flex flex-horizontal justify-content-between align-items-center flex-shrink-0">
                 <h5 class="m-0 d-inline-block">Messages</h5>
                 <div class="text-nowrap">
                     <button class="btn btn-sm btn-primary mr-1" @click="compile()">Compile</button>
