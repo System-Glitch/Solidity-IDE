@@ -58,26 +58,30 @@
                     method().call({from: activeAccount.address})
                     .then((result) => {
                         this.editor.getSession().setMode('ace/mode/json');
-                        this.editor.setValue(JSON.stringify(result, null, 4));
+                        this.setMessage(JSON.stringify(result, null, 4));
                     })
                     .catch((error) => {
                         this.editor.getSession().setMode(null);
-                        this.editor.setValue(error.message);
+                        this.setMessage(error.message);
                     });
                 } else {
                     method().send({value: data.amount, from: activeAccount.address})
                     .on('error', (result) => {
                         this.editor.getSession().setMode(null);
-                        this.editor.setValue(result.message);
+                        this.setMessage(result.message);
                         Event.$emit('refreshAccounts', "all");
                     })
                     .on('receipt', (result) => {
                         this.editor.getSession().setMode('ace/mode/json');
-                        this.editor.setValue(JSON.stringify(result, null, 4));
+                        this.setMessage(JSON.stringify(result, null, 4));
                         Event.$emit('refreshAccounts', "all");
                     });
                     
                 }
+            },
+            setMessage: function(message) {
+                this.editor.setValue(message);
+                this.editor.gotoLine(0, 0, false);
             }
         },
         beforeDestroy() {
