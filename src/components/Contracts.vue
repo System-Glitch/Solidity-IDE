@@ -69,3 +69,9 @@
         }
     }
 </script>
+<style scoped>
+    #contracts-container {
+        min-height: 250px;
+        max-height: 250px;
+    }
+</style>
