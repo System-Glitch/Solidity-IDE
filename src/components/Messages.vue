@@ -46,6 +46,8 @@
                 this.messages = messages;
             });
             Event.$on('message', (message) => {
+                if(Array.isArray(message))
+                    message = message[0];
                 this.messages.push(message);
             });
         }

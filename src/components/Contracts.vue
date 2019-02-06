@@ -28,6 +28,12 @@
             dismiss: function(contract) {
                 this.contracts.splice(this.contracts.indexOf(contract), 1);
                 this.updateContractsCounter(contract);
+
+                if(this.contracts.length == 0) {
+                    setTimeout(() => {
+                        Event.$emit('contractsViewUpdated');
+                    }, 0);
+                }
             },
             updateContractsCounter: function(contract) {
                 for(let key in this.contracts) {
@@ -52,14 +58,14 @@
             Event.$on('contract', (contract) => {
                 contract.id = this.counter++;
                 contract.duplicateNumber = this.getDuplicateNumber(contract);
+
+                setTimeout(() => {
+                    Event.$emit('contractsViewUpdated');
+                }, 0);
+
                 this.contracts.push(contract);
+
             });
         }
     }
 </script>
-<style scoped>
-    #contracts-container {
-        min-height: 250px;
-        max-height: 250px;
-    }
-</style>

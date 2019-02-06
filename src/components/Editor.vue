@@ -1,6 +1,6 @@
 <template>
     <div class="flex-grow-1 w-100">
-        <div class="h-100">
+        <div class="h-100" v-on:resize="handleResize">
             <div id="editor" class="h-100 w-100 monospace"></div>
         </div>
     </div>
@@ -142,6 +142,9 @@
                     errLine: parseInt(err[2], 10) - 1,
                     errCol: err[4] ? parseInt(err[4], 10) : 0
                 }
+            },
+            handleResize: function() {
+                this.editor.resize();
             }
         },
         mounted() {
@@ -175,13 +178,17 @@
                 }.bind(this));
             });
 
+            Event.$on('contractsViewUpdated', () => {
+                this.handleResize();
+            });
+
             this.load('contract.sol');  // TODO handle multiple files
         }
     }
 </script>
 <style scoped>
-#editor {
-    border-right: 1px solid #444;
-    border-bottom: 1px solid #444;
-}
+    #editor {
+        border-right: 1px solid #444;
+        border-bottom: 1px solid #444;
+    }
 </style>
