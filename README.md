@@ -7,7 +7,7 @@
 ## Install
 
 **Option 1:** Download the latest [release](https://github.com/System-Glitch/Solidity-IDE/releases).  
-**Option 2:** Clone the repository and run `npm install`. On windows, you may need to have Visual C++ installed.  
+**Option 2:** Clone the repository and run `npm install`. On windows, you may need to install the [build tools](https://github.com/felixrieseberg/windows-build-tools) using: `npm install --global windows-build-tools`  
 
 ```
 npm run build-local
@@ -19,7 +19,7 @@ The second command will run ganache and the solc server in the background, don't
 
 ## For developers
 
-If you want to contribute to this project, fork, install the dependencies and run the development tools. On windows, you may need to have Visual C++ installed.
+If you want to contribute to this project, fork, install the dependencies and run the development tools. On windows, you may need to install the [build tools](https://github.com/felixrieseberg/windows-build-tools) using: `npm install --global windows-build-tools`  
 
 ```
 npm install
