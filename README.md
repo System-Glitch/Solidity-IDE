@@ -34,7 +34,6 @@ npm run serve
 ## TODO
 
 - Multiple files
-- Resizable columns
 - Dark-themed inputs
 - Basic completion
 - Generators

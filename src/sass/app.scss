@@ -10,6 +10,8 @@
 
 body, html {
     height: 100%;
+    min-width: 600px;
+    min-height: 500px;
 }
 
 .monospace {
@@ -141,4 +143,16 @@ body, html {
     z-index: 2;
     opacity: 0.85;
     border-radius: 0px;
+}
+
+.gutter {
+    background-color: #444;
+}
+
+.gutter-horizontal:hover {
+    cursor: col-resize;
+}
+
+.gutter-vertical:hover {
+    cursor: row-resize;
 }

@@ -17,9 +17,3 @@
         }
     }
 </script>
-<style scoped>
-    #sidebar {
-        width: 30%;
-        min-width: 30%;
-    }
-</style>

@@ -1,7 +1,7 @@
 <template>
-    <div class="flex-grow-1 w-100">
+    <div class="flex-grow-1">
         <div class="h-100" v-on:resize="handleResize">
-            <div id="editor" class="h-100 w-100 monospace"></div>
+            <div :id="'editor' + _uid" class="h-100 w-100 monospace"></div>
         </div>
     </div>
 </template>
@@ -9,6 +9,8 @@
 <script>
     const ace = require('brace');
     const Range = ace.acequire("ace/range").Range;
+    require('ace-mode-solidity/build/remix-ide/mode-solidity');
+    require('brace/theme/tomorrow_night');
 
     export default {
         name: "editor",
@@ -147,10 +149,8 @@
             }
         },
         mounted() {
-            require('ace-mode-solidity/build/remix-ide/mode-solidity');
-            require('brace/theme/tomorrow_night');
 
-            this.editor = ace.edit('editor');
+            this.editor = ace.edit('editor' + this._uid);
             this.editor.getSession().setMode('ace/mode/solidity');
             this.editor.setTheme('ace/theme/tomorrow_night');
             this.editor.setOptions({
@@ -177,7 +177,7 @@
                 }.bind(this));
             });
 
-            Event.$on('contractsViewUpdated', () => {
+            Event.$on('resizeEditor', () => {
                 this.handleResize();
             });
 
@@ -185,9 +185,3 @@
         }
     }
 </script>
-<style scoped>
-    #editor {
-        border-right: 1px solid #444;
-        border-bottom: 1px solid #444;
-    }
-</style>
