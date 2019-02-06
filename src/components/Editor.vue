@@ -21,7 +21,7 @@
         methods: {
             compile: function(callback) {
                 this.save();
-                $.ajax({
+                window.$.ajax({
                     method: 'POST',
                     url: 'http://localhost:8081/compile',
                     crossDomain: true,
@@ -45,13 +45,13 @@
                         }
                     }
                 }.bind(this))
-                .fail(function( jqXHR, textStatus ) {
+                .fail(function( jqXHR ) {
                     Event.$emit('messages', [{severity: 'error', formattedMessage: "Compilation request failed with status " + jqXHR.status + ": " + jqXHR.responseText }]);
                 });
             },
             deploy: function(contractName, compiledContract) {
-                const contract = new web3.eth.Contract(compiledContract.abi);
-                const activeAccount = accountManager.getActiveAccount();
+                const contract = new window.web3.eth.Contract(compiledContract.abi);
+                const activeAccount = window.accountManager.getActiveAccount();
                 contract.deploy({
                     data: compiledContract.evm.bytecode.object,
                 }).send({
@@ -166,7 +166,7 @@
             Event.$on('deploy', () => {
                 this.compile(function(contractName, compiledContract) {
 
-                    if(accountManager.selectedAccount == -1) { // Fetch accounts if missing
+                    if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
                         Event.$emit('refreshAccounts', 'all', () => {
                             this.deploy(contractName, compiledContract);
                         });

@@ -50,10 +50,10 @@
         methods: {
             run: function(data) {
                 if(data.unit == 'ether')
-                    data.amount = web3.utils.toWei(data.amount, "ether");
+                    data.amount = window.web3.utils.toWei(data.amount, "ether");
 
                 const method = this.contract.methods[data.method.name];
-                const activeAccount = accountManager.getActiveAccount();
+                const activeAccount = window.accountManager.getActiveAccount();
                 if(data.method.stateMutability == 'view') {
                     method().call({from: activeAccount.address})
                     .then((result) => {

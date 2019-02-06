@@ -43,23 +43,23 @@
         name: "accounts",
         data: function() {
             return {
-                accountManager: accountManager
+                accountManager: window.accountManager
             }
         },
         methods: {
             updateAccounts: function(callback) {
-                web3.eth.getAccounts().then(function(accounts) {
+                window.web3.eth.getAccounts().then(function(accounts) {
                     const temp = [];
                     for(let key in accounts) {
                         const account = accounts[key];
-                        const current = accountManager.find(account);
+                        const current = window.accountManager.find(account);
                         temp.push({address: account, balance: current != null ? current.balance : 0});
                         this.updateAccount(account);
                     }
-                    if(accountManager.accounts.length == 0) {
-                        accountManager.selectedAccount = 0;
+                    if(window.accountManager.accounts.length == 0) {
+                        window.accountManager.selectedAccount = 0;
                     }
-                    accountManager.accounts = temp;
+                    window.accountManager.accounts = temp;
 
                     if(callback != undefined) {
                         callback();
@@ -67,8 +67,8 @@
                 }.bind(this));
             },
             updateAccount: function(account, callback) {
-                web3.eth.getBalance(account).then(function(balance) {
-                    accountManager.find(account).balance = web3.utils.fromWei(balance.toString(), "ether").toString();
+                window.web3.eth.getBalance(account).then(function(balance) {
+                    window.accountManager.find(account).balance = window.web3.utils.fromWei(balance.toString(), "ether").toString();
 
                     if(callback != undefined) {
                         callback();
