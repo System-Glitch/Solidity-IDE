@@ -25,6 +25,10 @@ body, html {
     padding-bottom: 0.25rem !important;
 }
 
+.flex-fit {
+    height: 1px;
+}
+
 .form-control-sm {
     height: calc(1.68125rem + 2px) !important;
     padding: 0.25rem 0.5rem !important;
@@ -34,7 +38,7 @@ body, html {
 }
 
 .scrollable {
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .fit-parent, .fit-parent .tab-content {

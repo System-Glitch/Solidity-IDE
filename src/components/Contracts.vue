@@ -1,5 +1,5 @@
 <template>
-    <b-tabs class="w-100 bg-dark d-flex flex-column fit-parent" id="contracts-container" no-fade>
+    <b-tabs class="w-100 bg-dark d-flex flex-column fit-parent" id="contracts-container" no-fade v-if="contracts.length">
         <b-tab v-for="contract in contracts" :key="contract.id" class="container-fluid fit-parent">
             <template slot="title">
                 <span>{{ contract.name + printDuplicateNumber(contract.duplicateNumber) }}</span><button class="ml-1 close text-light" type="button" @click="dismiss(contract)">×</button>

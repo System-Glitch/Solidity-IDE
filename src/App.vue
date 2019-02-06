@@ -1,6 +1,6 @@
 <template>
     <div id="app" class="h-100 d-flex flex-column">
-        <div class="w-100 flex-grow-1 d-flex flex-nowrap">
+        <div class="w-100 flex-grow-1 d-flex flex-nowrap flex-fit">
             <editor/>
             <sidebar/>
         </div>
