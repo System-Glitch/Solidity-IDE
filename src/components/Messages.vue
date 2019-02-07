@@ -44,26 +44,28 @@
                     default: return 'info';
                 }
             },
-            setMessages: function(messages) {
-                this.messages = messages;
-                for(let i = 0 ; i < this.messages.length ; i++) {
-                    this.messages[i].id = this.messageCount++;
+            clearMessages: function() {
+                this.messages = [];
+            },
+            addMessages: function(messages) {
+                for(let i = 0 ; i < messages.length ; i++) {
+                    this.addMessage(messages[i]);
                 }
             },
             addMessage: function(message) {
-                if(Array.isArray(message))
-                    message = message[0];
                 message.id = this.messageCount++;
                 this.messages.push(message);
             }
         },
         mounted() {
-            Event.$on('messages', this.setMessages);
+            Event.$on('messages', this.addMessages);
             Event.$on('message', this.addMessage);
+            Event.$on('clearMessages', this.clearMessages);
         },
         beforeDestroy() {
-            Event.$off('messages', this.setMessages);
+            Event.$off('messages', this.addMessages);
             Event.$off('message', this.addMessage);
+            Event.$off('clearMessages', this.clearMessages);
         }
     }
 </script>

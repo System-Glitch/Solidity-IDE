@@ -23,35 +23,31 @@
         methods: {
             compile: function(callback) {
                 this.save();
+                Event.$emit('clearMessages');
                 window.$.ajax({
                     method: 'POST',
                     url: 'http://localhost:8081/compile',
                     crossDomain: true,
                     dataType: 'json',
                     data: {
-                        title: 'contract.sol',
-                        source: this.editor.getValue()
+                        'contract.sol': this.editor.getValue() // TODO file name
                     }
                 }).done(function(data) {
                     this.clearMarkers();
                     this.editor.getSession().clearAnnotations();
+                    for(let key in data.contracts) {
+                        Event.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
+                        if(callback != undefined) {
+                            callback(data.contracts[key]);
+                        }
+                    }
                     if(data.errors != undefined) {
                         Event.$emit('messages', data.errors);
                         this.editor.getSession().setAnnotations(this.buildAnnotations(data.errors));
-                    } else {
-                        for(let key in data.contracts) {
-                            Event.$emit('messages', [{severity: 'success', formattedMessage: key + ": Compilation successful."}]);
-                            for(let keyContract in data.contracts[key]) {
-                                const contract = data.contracts[key][keyContract];
-                                if(callback != undefined) {
-                                    callback(keyContract, contract);
-                                }
-                            }
-                        }
                     }
                 }.bind(this))
                 .fail(function( jqXHR ) {
-                    Event.$emit('messages', [{severity: 'error', formattedMessage: "Compilation request failed with status " + jqXHR.status + ": " + jqXHR.responseText }]);
+                    Event.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed with status " + jqXHR.status + ": " + jqXHR.responseText });
                 });
             },
             deploy: function(contractName, compiledContract) {
@@ -69,17 +65,21 @@
                         Event.$emit('refreshAccounts', [activeAccount.address]);
                     }
                 }).catch((error) => {
-                    Event.$emit('message', [{severity: 'error', formattedMessage: "Deploy failed: " + error.message}]);
+                    Event.$emit('message', {severity: 'error', formattedMessage: "Deploy failed: " + error.message});
                 });
             },
             compileAndDeploy: function() {
-                this.compile(function(contractName, compiledContract) {
+                this.compile(function(contracts) {
                     if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
                         Event.$emit('refreshAccounts', window.accountManager.selectedAccount, () => {
-                            this.deploy(contractName, compiledContract);
+                            for(let key in contracts) {
+                                this.deploy(key, contracts[key]);
+                            }
                         });
                     } else {
-                        this.deploy(contractName, compiledContract);
+                        for(let key in contracts) {
+                            this.deploy(key, contracts[key]);
+                        }
                     }
 
                 }.bind(this));

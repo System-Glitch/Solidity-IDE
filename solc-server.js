@@ -13,13 +13,13 @@ app.use(function(req, res, next) {
 })
 
 app.post('/compile', function (req, res) {
-    const title = req.body.title;
-    const source = req.body.source;
 
     const sources = {};
-    sources[title] = {
-        content: source
-    };
+    for(let key in req.body) {
+        sources[key] = {
+            content: req.body[key]
+        };
+    }
     const input = {
         language: 'Solidity',
         sources: sources,
