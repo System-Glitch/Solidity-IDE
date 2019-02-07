@@ -35,6 +35,18 @@
                     }, 0);
                 }
             },
+            onContractCreated: function(contract) {
+                contract.id = this.counter++;
+                contract.duplicateNumber = this.getDuplicateNumber(contract);
+
+                if(this.contracts.length == 0) {
+                    setTimeout(() => {
+                        Event.$emit('resizeEditor');
+                    }, 0);
+                }
+
+                this.contracts.push(contract);
+            },
             updateContractsCounter: function(contract) {
                 for(let key in this.contracts) {
                     if(this.contracts[key].name == contract.name)
@@ -55,19 +67,10 @@
             }
         },
         mounted() {
-            Event.$on('contract', (contract) => {
-                contract.id = this.counter++;
-                contract.duplicateNumber = this.getDuplicateNumber(contract);
-
-                if(this.contracts.length == 0) {
-                    setTimeout(() => {
-                        Event.$emit('resizeEditor');
-                    }, 0);
-                }
-
-                this.contracts.push(contract);
-
-            });
+            Event.$on('contract', this.onContractCreated);
+        },
+        beforeDestroy() {
+            Event.$off('contract', this.onContractCreated);
         }
     }
 </script>

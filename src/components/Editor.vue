@@ -39,10 +39,13 @@
                         Event.$emit('messages', data.errors);
                         this.editor.getSession().setAnnotations(this.buildAnnotations(data.errors));
                     } else {
-                        Event.$emit('messages', [{severity: 'success', formattedMessage: "Compilation successful."}]);
-                        if(callback != undefined) {
-                            for(let key in data.contracts.title) {
-                                callback(key, data.contracts.title[key]);
+                        for(let key in data.contracts) {
+                            Event.$emit('messages', [{severity: 'success', formattedMessage: key + ": Compilation successful."}]);
+                            for(let keyContract in data.contracts[key]) {
+                                const contract = data.contracts[key][keyContract];
+                                if(callback != undefined) {
+                                    callback(keyContract, contract);
+                                }
                             }
                         }
                     }
@@ -61,13 +64,25 @@
                     gas: '4700000',
                 }).then((contract) => {
                     if (typeof contract.options !== 'undefined') {
-                        Event.$emit('message', {severity: 'success', formattedMessage: "Deploy success.\nContract address: " + contract.options.address});
+                        Event.$emit('message', {severity: 'success', formattedMessage: contractName + ": Deploy success.\nContract address: " + contract.options.address});
                         Event.$emit('contract', {contract: contract, abi: compiledContract.abi, name: contractName});
                         Event.$emit('refreshAccounts', [activeAccount.address]);
                     }
                 }).catch((error) => {
                     Event.$emit('message', [{severity: 'error', formattedMessage: "Deploy failed: " + error.message}]);
                 });
+            },
+            compileAndDeploy: function() {
+                this.compile(function(contractName, compiledContract) {
+                    if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
+                        Event.$emit('refreshAccounts', window.accountManager.selectedAccount, () => {
+                            this.deploy(contractName, compiledContract);
+                        });
+                    } else {
+                        this.deploy(contractName, compiledContract);
+                    }
+
+                }.bind(this));
             },
             save: function() {
                 localStorage['contract.sol'] = this.editor.getValue(); // TODO handle multiple files
@@ -94,10 +109,10 @@
                     const rowStart = this.getRowAtPosition(message.sourceLocation.start);
                     const rowEnd = this.getRowAtPosition(message.sourceLocation.end);
                     const range = new Range(
-                            rowStart,
-                            message.sourceLocation.start - this.getStartPositionForRow(rowStart) - 1,
-                            rowEnd,
-                            message.sourceLocation.end - this.getStartPositionForRow(rowEnd) - 1 
+                        rowStart,
+                        message.sourceLocation.start - this.getStartPositionForRow(rowStart) - 1,
+                        rowEnd,
+                        message.sourceLocation.end - this.getStartPositionForRow(rowEnd) - 1
                         );
                     this.editor.getSession().addMarker(range, this.getMarkerClass(message.severity), "line", false);
                 }
@@ -117,71 +132,59 @@
                 for(let i = 0 ; i < pos ; i++)
                     if(text.charAt(i) == '\n')
                         count++;
-                return count;
-            },
-            getStartPositionForRow: function(row) {
-                const text = this.editor.getValue();
-                const length = text.length;
-                var count = 0;
+                    return count;
+                },
+                getStartPositionForRow: function(row) {
+                    const text = this.editor.getValue();
+                    const length = text.length;
+                    var count = 0;
 
-                for(let i = 0 ; i < length ; i++) {
-                    if(text.charAt(i) == '\n')
-                        count++;
+                    for(let i = 0 ; i < length ; i++) {
+                        if(text.charAt(i) == '\n')
+                            count++;
 
-                    if(count == row) {
-                        return i;
+                        if(count == row) {
+                            return i;
+                        }
                     }
+                    return -1;
+                },
+                getMarkerClass: function(severity) {
+                    return 'marker-' + severity;
+                },
+                parseRegExError: function(err) {
+                    return {
+                        errFile: err[1],
+                        errLine: parseInt(err[2], 10) - 1,
+                        errCol: err[4] ? parseInt(err[4], 10) : 0
+                    }
+                },
+                handleResize: function() {
+                    this.editor.resize();
                 }
-                return -1;
             },
-            getMarkerClass: function(severity) {
-                return 'marker-' + severity;
-            },
-            parseRegExError: function(err) {
-                return {
-                    errFile: err[1],
-                    errLine: parseInt(err[2], 10) - 1,
-                    errCol: err[4] ? parseInt(err[4], 10) : 0
-                }
-            },
-            handleResize: function() {
+            mounted() {
+
+                this.editor = ace.edit('editor' + this._uid);
+                this.editor.getSession().setMode('ace/mode/solidity');
+                this.editor.setTheme('ace/theme/tomorrow_night');
+                this.editor.setOptions({
+                    autoScrollEditorIntoView: true,
+                    showPrintMargin: false,
+                });
                 this.editor.resize();
-            }
-        },
-        mounted() {
 
-            this.editor = ace.edit('editor' + this._uid);
-            this.editor.getSession().setMode('ace/mode/solidity');
-            this.editor.setTheme('ace/theme/tomorrow_night');
-            this.editor.setOptions({
-                autoScrollEditorIntoView: true,
-                showPrintMargin: false,
-            });
-            this.editor.resize();
-
-            Event.$on('compile', () => {
-                this.compile();
-            });
-
-            Event.$on('deploy', () => {
-                this.compile(function(contractName, compiledContract) {
-
-                    if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
-                        Event.$emit('refreshAccounts', 'all', () => {
-                            this.deploy(contractName, compiledContract);
-                        });
-                    } else {
-                        this.deploy(contractName, compiledContract);
-                    }
-
-                }.bind(this));
-            });
-
-            Event.$on('resizeEditor', () => {
-                this.handleResize();
-            });
+                Event.$on('compile', this.compile);
+                Event.$on('deploy', this.compileAndDeploy);
+                Event.$on('resizeEditor', this.handleResize);
 
             this.load('contract.sol');  // TODO handle multiple files
+        },
+        beforeDestroy() {
+            Event.$off('compile', this.compile);
+            Event.$off('deploy', this.compileAndDeploy);
+            Event.$off('resizeEditor', this.handleResize);
+            this.editor.destroy();
         }
     }
 </script>

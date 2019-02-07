@@ -47,6 +47,15 @@
             }
         },
         methods: {
+            refreshAccounts: function(accounts, callback) {
+                if(accounts == "all") {
+                    this.updateAccounts(callback);
+                } else {
+                    for(let i = 0 ; i < accounts.length ; i++) {
+                        this.updateAccount(accounts[i], callback);
+                    }
+                }
+            },
             updateAccounts: function(callback) {
                 window.web3.eth.getAccounts().then(function(accounts) {
                     const temp = [];
@@ -78,17 +87,10 @@
         },
         mounted() {
             this.updateAccounts();
-
-            Event.$on('refreshAccounts', (accounts, callback) => {
-                if(accounts == "all") {
-                    this.updateAccounts(callback);
-                } else {
-                    for(let i = 0 ; i < accounts.length ; i++) {
-                        this.updateAccount(accounts[i], callback);
-                    }
-                }
-
-            });
+            Event.$on('refreshAccounts', this.refreshAccounts);
+        },
+        beforeDestroy() {
+            Event.$off('refreshAccounts', this.refreshAccounts);
         }
     }
 </script>

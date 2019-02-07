@@ -16,13 +16,13 @@ app.post('/compile', function (req, res) {
     const title = req.body.title;
     const source = req.body.source;
 
-    var input = {
+    const sources = {};
+    sources[title] = {
+        content: source
+    };
+    const input = {
         language: 'Solidity',
-        sources: {
-            title: {
-                content: source
-            }
-        },
+        sources: sources,
         settings: {
             outputSelection: {
                 '*': {

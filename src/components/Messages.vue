@@ -9,7 +9,7 @@
             </div>
             <div class="flex scrollable flex-grow-1">
                 <div class="col">
-                    <b-alert v-for="(message, index) in messages" :key="index" :variant="getVariant(message.severity)" show dismissible class="p-1 pr-4 mb-2">
+                    <b-alert v-for="message in messages" :key="message.id" :variant="getVariant(message.severity)" show dismissible class="p-1 pr-4 mb-2" @dismissed="dismiss(message)">
                         <div class="w-100 overflow-auto monospace">{{ message.formattedMessage }}</div>
                     </b-alert>
                 </div>
@@ -22,7 +22,8 @@
         name: "messages",
         data: function() {
             return {
-                messages: []
+                messages: [],
+                messageCount: 0
             }
         },
         methods: {
@@ -32,6 +33,9 @@
             deploy: function() {
                 Event.$emit('deploy');
             },
+            dismiss: function(message) {
+                this.messages.splice(this.messages.indexOf(message), 1);
+            },
             getVariant: function(severity) {
                 switch(severity) {
                     case 'error': return 'danger';
@@ -39,17 +43,27 @@
                     case 'success': return 'success';
                     default: return 'info';
                 }
+            },
+            setMessages: function(messages) {
+                this.messages = messages;
+                for(let i = 0 ; i < this.messages.length ; i++) {
+                    this.messages[i].id = this.messageCount++;
+                }
+            },
+            addMessage: function(message) {
+                if(Array.isArray(message))
+                    message = message[0];
+                message.id = this.messageCount++;
+                this.messages.push(message);
             }
         },
         mounted() {
-            Event.$on('messages', (messages) => {
-                this.messages = messages;
-            });
-            Event.$on('message', (message) => {
-                if(Array.isArray(message))
-                    message = message[0];
-                this.messages.push(message);
-            });
+            Event.$on('messages', this.setMessages);
+            Event.$on('message', this.addMessage);
+        },
+        beforeDestroy() {
+            Event.$off('messages', this.setMessages);
+            Event.$off('message', this.addMessage);
         }
     }
 </script>

@@ -40,9 +40,6 @@
                     method: this.method 
                 });
             }
-        },
-        mounted() {
-            
         }
     }
 </script>
