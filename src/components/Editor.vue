@@ -24,6 +24,7 @@
             compile: function(callback) {
                 this.save();
                 Event.$emit('clearMessages');
+                Event.$emit('processing', true);
                 window.$.ajax({
                     method: 'POST',
                     url: 'http://localhost:8081/compile',
@@ -45,14 +46,19 @@
                         Event.$emit('messages', data.errors);
                         this.editor.getSession().setAnnotations(this.buildAnnotations(data.errors));
                     }
+                    if(callback == undefined) {
+                        Event.$emit('processing', false);
+                    }
                 }.bind(this))
                 .fail(function( jqXHR ) {
                     Event.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed with status " + jqXHR.status + ": " + jqXHR.responseText });
+                    Event.$emit('processing', false);
                 });
             },
             deploy: function(contractName, compiledContract) {
                 const contract = new window.web3.eth.Contract(compiledContract.abi);
                 const activeAccount = window.accountManager.getActiveAccount();
+                Event.$emit('processing', true);
                 contract.deploy({
                     data: compiledContract.evm.bytecode.object,
                 }).send({
@@ -64,8 +70,10 @@
                         Event.$emit('contract', {contract: contract, abi: compiledContract.abi, name: contractName});
                         Event.$emit('refreshAccounts', [activeAccount.address]);
                     }
+                    Event.$emit('processing', false);
                 }).catch((error) => {
                     Event.$emit('message', {severity: 'error', formattedMessage: "Deploy failed: " + error.message});
+                    Event.$emit('processing', false);
                 });
             },
             compileAndDeploy: function() {

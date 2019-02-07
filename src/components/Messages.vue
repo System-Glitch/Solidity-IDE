@@ -8,6 +8,9 @@
                 </div>
             </div>
             <div class="flex scrollable flex-grow-1">
+                <div class="col mb-2">
+                    <b-progress :value="100" :max="100" variant="success" animated v-if="processing"></b-progress>
+                </div>
                 <div class="col">
                     <b-alert v-for="message in messages" :key="message.id" :variant="getVariant(message.severity)" show dismissible class="p-1 pr-4 mb-2" @dismissed="dismiss(message)">
                         <div class="w-100 overflow-auto monospace">{{ message.formattedMessage }}</div>
@@ -23,7 +26,8 @@
         data: function() {
             return {
                 messages: [],
-                messageCount: 0
+                messageCount: 0,
+                processing: false,
             }
         },
         methods: {
@@ -55,17 +59,22 @@
             addMessage: function(message) {
                 message.id = this.messageCount++;
                 this.messages.push(message);
+            },
+            setProcessing: function(processing) {
+                this.processing = processing;
             }
         },
         mounted() {
             Event.$on('messages', this.addMessages);
             Event.$on('message', this.addMessage);
             Event.$on('clearMessages', this.clearMessages);
+            Event.$on('processing', this.setProcessing);
         },
         beforeDestroy() {
             Event.$off('messages', this.addMessages);
             Event.$off('message', this.addMessage);
             Event.$off('clearMessages', this.clearMessages);
+            Event.$off('processing', this.setProcessing);
         }
     }
 </script>

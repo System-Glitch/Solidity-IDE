@@ -57,7 +57,7 @@
                 }
             },
             updateAccounts: function(callback) {
-                window.web3.eth.getAccounts().then(function(accounts) {
+                window.web3.eth.getAccounts().then((accounts) => {
                     const temp = [];
                     for(let key in accounts) {
                         const account = accounts[key];
@@ -73,16 +73,22 @@
                     if(callback != undefined) {
                         callback();
                     }
-                }.bind(this));
+                })
+                .catch((error) => {
+                    Event.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch accounts: " + error.message});
+                });
             },
             updateAccount: function(account, callback) {
-                window.web3.eth.getBalance(account).then(function(balance) {
+                window.web3.eth.getBalance(account).then((balance) => {
                     window.accountManager.find(account).balance = window.web3.utils.fromWei(balance.toString(), "ether").toString();
 
                     if(callback != undefined) {
                         callback();
                     }
-                });
+                })
+                .catch((error) => {
+                    Event.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch account " + account + ": " + error.message});
+                });;
             }
         },
         mounted() {
