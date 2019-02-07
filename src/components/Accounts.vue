@@ -88,7 +88,7 @@
                 })
                 .catch((error) => {
                     Event.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch account " + account + ": " + error.message});
-                });;
+                });
             }
         },
         mounted() {
