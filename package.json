@@ -1,6 +1,6 @@
 {
   "name": "solidity-ide",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -27,7 +27,7 @@
     "bootstrap": "^4.2.1",
     "bootstrap-vue": "^2.0.0-rc.11",
     "brace": "^0.11.1",
-    "core-js": "^2.6.3",
+    "core-js": "^2.6.4",
     "es6-promise": "^4.2.5",
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0",
@@ -35,10 +35,10 @@
     "node-sass": "^4.11.0",
     "sass-loader": "^7.1.0",
     "split.js": "^1.5.10",
-    "vue": "^2.6.2",
-    "vue-template-compiler": "^2.6.2",
+    "vue": "^2.6.3",
+    "vue-template-compiler": "^2.6.3",
     "web3": "1.0.0-beta.34",
-    "webpack": "^4.29.2"
+    "webpack": "^4.29.3"
   },
   "eslintConfig": {
     "root": true,

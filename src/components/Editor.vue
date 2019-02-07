@@ -14,6 +14,12 @@
 
     export default {
         name: "editor",
+        props: {
+            fileName: {
+                type: String,
+                default: 'contract.sol' // TODO file name
+            }
+        },
         data: function() {
             return {
                 editor: null,
@@ -25,28 +31,32 @@
                 this.save();
                 Event.$emit('clearMessages');
                 Event.$emit('processing', true);
+
+                const data = {};
+                data[this.fileName] = this.editor.getValue();
+
                 window.$.ajax({
                     method: 'POST',
                     url: 'http://localhost:8081/compile',
                     crossDomain: true,
                     dataType: 'json',
-                    data: {
-                        'contract.sol': this.editor.getValue() // TODO file name
-                    }
+                    data: data
                 }).done(function(data) {
                     this.clearMarkers();
                     this.editor.getSession().clearAnnotations();
-                    for(let key in data.contracts) {
-                        Event.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
-                        if(callback != undefined) {
-                            callback(data.contracts[key]);
+                    if(data.contracts != undefined) {
+                        for(let key in data.contracts) {
+                            Event.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
+                            if(callback != undefined) {
+                                callback(data.contracts[key]);
+                            }
                         }
                     }
                     if(data.errors != undefined) {
                         Event.$emit('messages', data.errors);
                         this.editor.getSession().setAnnotations(this.buildAnnotations(data.errors));
                     }
-                    if(callback == undefined) {
+                    if(callback == undefined || data.contracts == undefined) {
                         Event.$emit('processing', false);
                     }
                 }.bind(this))
@@ -93,7 +103,7 @@
                 }.bind(this));
             },
             save: function() {
-                localStorage['contract.sol'] = this.editor.getValue(); // TODO handle multiple files
+                localStorage[this.fileName] = this.editor.getValue(); // TODO handle multiple files
             },
             load: function(contract) {
                 if(localStorage[contract]) {
@@ -106,23 +116,22 @@
                 for(let key in errors) {
                     const message = errors[key];
 
-                    const errLocation = message.formattedMessage.match(/^([^:]*):([0-9]*):(([0-9]*):)? /);
-                    const annotation = {
-                        row: parseInt(errLocation[2], 10) - 1,
-                        column: errLocation[4] ? parseInt(errLocation[4], 10) : 0,
-                        text: message.message,
-                        type: message.severity
+                    if(message.sourceLocation.file == this.fileName) {
+                        const rowStart = this.getRowAtPosition(message.sourceLocation.start);
+                        const rowEnd = this.getRowAtPosition(message.sourceLocation.end);
+                        const colStart = message.sourceLocation.start - this.getStartPositionForRow(rowStart) - 1;
+                        const colEnd = message.sourceLocation.end - this.getStartPositionForRow(rowEnd) - 1;
+
+                        const annotation = {
+                            row: rowStart,
+                            column: colStart,
+                            text: message.message,
+                            type: message.severity
+                        }
+                        result.push(annotation);
+                        const range = new Range(rowStart, colStart, rowEnd, colEnd);
+                        this.editor.getSession().addMarker(range, this.getMarkerClass(message.severity), "line", false);
                     }
-                    result.push(annotation);
-                    const rowStart = this.getRowAtPosition(message.sourceLocation.start);
-                    const rowEnd = this.getRowAtPosition(message.sourceLocation.end);
-                    const range = new Range(
-                        rowStart,
-                        message.sourceLocation.start - this.getStartPositionForRow(rowStart) - 1,
-                        rowEnd,
-                        message.sourceLocation.end - this.getStartPositionForRow(rowEnd) - 1
-                        );
-                    this.editor.getSession().addMarker(range, this.getMarkerClass(message.severity), "line", false);
                 }
                 return result;
             },
@@ -186,7 +195,7 @@
                 Event.$on('deploy', this.compileAndDeploy);
                 Event.$on('resizeEditor', this.handleResize);
 
-            this.load('contract.sol');  // TODO handle multiple files
+            this.load(this.fileName);  // TODO handle multiple files
         },
         beforeDestroy() {
             Event.$off('compile', this.compile);
