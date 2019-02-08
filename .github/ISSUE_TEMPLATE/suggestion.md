@@ -1,6 +1,6 @@
 ---
 name: Suggest a feature or enhancement
-about: Submit an idea for a feature on enhancement
+about: Submit an idea for a feature or enhancement
 
 ---
 
