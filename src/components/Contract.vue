@@ -33,11 +33,13 @@
         },
         computed: {
             filteredAbi: function () {
+                var index = 0;
                 const filteredAbi = [];
                 for(let key in this.abi) {
                     const method = this.abi[key];
-                    if(method.type == 'function')
-                        filteredAbi[key] = method;
+                    if(method.type == 'function') {
+                        filteredAbi[index++] = method;
+                    }
                 }
                 return filteredAbi;
             }
@@ -54,29 +56,40 @@
 
                 const method = this.contract.methods[data.method.name];
                 const activeAccount = window.accountManager.getActiveAccount();
-                if(data.method.stateMutability == 'view') {
-                    method().call({from: activeAccount.address})
-                    .then((result) => {
-                        this.editor.getSession().setMode('ace/mode/json');
-                        this.setMessage(JSON.stringify(result, null, 4));
-                    })
-                    .catch((error) => {
-                        this.editor.getSession().setMode(null);
-                        this.setMessage(error.message);
-                    });
-                } else {
-                    method().send({value: data.amount, from: activeAccount.address})
-                    .on('error', (result) => {
-                        this.editor.getSession().setMode(null);
-                        this.setMessage(result.message);
-                        Event.$emit('refreshAccounts', "all");
-                    })
-                    .on('receipt', (result) => {
-                        this.editor.getSession().setMode('ace/mode/json');
-                        this.setMessage(JSON.stringify(result, null, 4));
-                        Event.$emit('refreshAccounts', "all");
-                    });
-                    
+                try {
+                    const params = JSON.parse(data.params);
+                    if(params.length < data.method.inputs.length)
+                        throw {message:
+                                'Invalid number of parameters for "' + data.method.name +
+                                '". Got ' + params.length + ' expected ' + data.method.inputs.length + '!'
+                            };
+
+                    if(data.method.stateMutability == 'view') {
+                        method.apply(null, params).call({from: activeAccount.address})
+                        .then((result) => {
+                            this.editor.getSession().setMode('ace/mode/json');
+                            this.setMessage(JSON.stringify(result, null, 4));
+                        })
+                        .catch((error) => {
+                            this.editor.getSession().setMode(null);
+                            this.setMessage(error.message);
+                        });
+                    } else {
+                        method.apply(null, params).send({value: data.amount, from: activeAccount.address})
+                        .on('error', (result) => {
+                            this.editor.getSession().setMode(null);
+                            this.setMessage(result.message);
+                            Event.$emit('refreshAccounts', "all");
+                        })
+                        .on('receipt', (result) => {
+                            this.editor.getSession().setMode('ace/mode/json');
+                            this.setMessage(JSON.stringify(result, null, 4));
+                            Event.$emit('refreshAccounts', "all");
+                        });
+                    }
+                } catch(error) {
+                    this.editor.getSession().setMode(null);
+                    this.setMessage(error.message);
                 }
             },
             setMessage: function(message) {
