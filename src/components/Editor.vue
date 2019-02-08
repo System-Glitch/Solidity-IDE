@@ -11,6 +11,7 @@
     const Range = ace.acequire("ace/range").Range;
     require('ace-mode-solidity/build/remix-ide/mode-solidity');
     require('brace/theme/tomorrow_night');
+    require("brace/ext/language_tools");
 
     export default {
         name: "editor",
@@ -182,12 +183,15 @@
             },
             mounted() {
 
+                ace.acequire('ace/ext/language_tools');
                 this.editor = ace.edit('editor' + this._uid);
                 this.editor.getSession().setMode('ace/mode/solidity');
                 this.editor.setTheme('ace/theme/tomorrow_night');
                 this.editor.setOptions({
                     autoScrollEditorIntoView: true,
                     showPrintMargin: false,
+                    enableBasicAutocompletion: true,
+                    enableLiveAutocompletion: true
                 });
                 this.editor.resize();
 

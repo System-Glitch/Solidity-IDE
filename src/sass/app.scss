@@ -14,6 +14,29 @@ body, html {
     min-height: 500px;
 }
 
+.ace_autocomplete, .ace_autocomplete .ace_line, .ace_autocomplete .ace_content {
+    background-color: #212529;
+    color: var(--light);
+}
+
+.ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line {
+    background-color: var(--info);
+}
+
+.ace_completion-highlight {
+    color: var(--light) !important;
+    font-weight: bold;
+}
+
+.ace_autocomplete .ace_line-hover {
+    border: none !important;
+    background-color: rgba(23, 162, 184, 0.8) !important;
+}
+
+.ace_autocomplete .ace_selected {
+    background-color: #2c3034;
+}
+
 .btn {
     text-overflow: ellipsis;
     overflow: hidden;
