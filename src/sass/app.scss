@@ -14,6 +14,11 @@ body, html {
     min-height: 500px;
 }
 
+.btn {
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
 .monospace {
     font-family: 'Roboto Mono', monospace !important;
 }
