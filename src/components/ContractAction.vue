@@ -8,7 +8,8 @@
                       required
                       :placeholder="paramsPlaceholder"
                       v-model="params"
-                      v-if="method.inputs.length" />
+                      v-if="method.inputs.length"
+                      @keyup.enter.native="run()" />
                 <b-form-input class="col form-control-sm bg-light amount-select"
                       type="number"
                       required
