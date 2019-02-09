@@ -1,6 +1,10 @@
 
 // Fonts
 @import url('https://fonts.googleapis.com/css?family=Nunito');
+@font-face {
+    font-family: "Monospace", monospace;
+    src: url('/assets/Monospace.tff') format('truetype');
+}
 
 // Variables
 @import 'variables';
@@ -49,7 +53,7 @@ body, html {
 }
 
 .monospace {
-    font-family: 'Roboto Mono', monospace !important;
+    font-family: 'Monospace', monospace !important;
 }
 
 .nav-link {
