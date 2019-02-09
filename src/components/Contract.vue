@@ -64,7 +64,7 @@
                                 '". Got ' + params.length + ' expected ' + data.method.inputs.length + '!'
                             };
 
-                    if(data.method.stateMutability == 'view') {
+                    if(data.method.stateMutability == 'view' || data.method.stateMutability == 'pure') {
                         method.apply(null, params).call({from: activeAccount.address})
                         .then((result) => {
                             this.editor.getSession().setMode('ace/mode/json');
