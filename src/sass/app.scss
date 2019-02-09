@@ -19,6 +19,12 @@ body, html {
     color: var(--light);
 }
 
+.ace_autocomplete .ace_rightAlignedText {
+    color: #b4bfca;
+    font-style: italic;
+    z-index: 0;
+}
+
 .ace_editor.ace_autocomplete .ace_marker-layer .ace_active-line {
     background-color: var(--info);
 }
@@ -29,8 +35,8 @@ body, html {
 }
 
 .ace_autocomplete .ace_line-hover {
-    border: none !important;
-    background-color: rgba(23, 162, 184, 0.8) !important;
+    border-color: var(--info) !important;
+    background-color: #007bff88 !important;
 }
 
 .ace_autocomplete .ace_selected {

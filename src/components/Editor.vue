@@ -24,6 +24,7 @@
         data: function() {
             return {
                 editor: null,
+                langTools: null,
                 content: [],
             }
         },
@@ -147,57 +148,62 @@
             getRowAtPosition: function(pos) {
                 const text = this.editor.getValue();
                 var count = 0;
-                for(let i = 0 ; i < pos ; i++)
-                    if(text.charAt(i) == '\n')
+                for(let i = 0 ; i < pos ; i++) {
+                    if(text.charAt(i) == '\n') {
                         count++;
-                    return count;
-                },
-                getStartPositionForRow: function(row) {
-                    const text = this.editor.getValue();
-                    const length = text.length;
-                    var count = 0;
-
-                    for(let i = 0 ; i < length ; i++) {
-                        if(text.charAt(i) == '\n')
-                            count++;
-
-                        if(count == row) {
-                            return i;
-                        }
                     }
-                    return -1;
-                },
-                getMarkerClass: function(severity) {
-                    return 'marker-' + severity;
-                },
-                parseRegExError: function(err) {
-                    return {
-                        errFile: err[1],
-                        errLine: parseInt(err[2], 10) - 1,
-                        errCol: err[4] ? parseInt(err[4], 10) : 0
+                }
+                return count;
+            },
+            getStartPositionForRow: function(row) {
+                const text = this.editor.getValue();
+                const length = text.length;
+                var count = 0;
+
+                for(let i = 0 ; i < length ; i++) {
+                    if(text.charAt(i) == '\n') {
+                        count++;
                     }
-                },
-                handleResize: function() {
-                    this.editor.resize();
+
+                    if(count == row) {
+                        return i;
+                    }
+                }
+                return -1;
+            },
+            getMarkerClass: function(severity) {
+                return 'marker-' + severity;
+            },
+            parseRegExError: function(err) {
+                return {
+                    errFile: err[1],
+                    errLine: parseInt(err[2], 10) - 1,
+                    errCol: err[4] ? parseInt(err[4], 10) : 0
                 }
             },
-            mounted() {
-
-                ace.acequire('ace/ext/language_tools');
-                this.editor = ace.edit('editor' + this._uid);
-                this.editor.getSession().setMode('ace/mode/solidity');
-                this.editor.setTheme('ace/theme/tomorrow_night');
-                this.editor.setOptions({
-                    autoScrollEditorIntoView: true,
-                    showPrintMargin: false,
-                    enableBasicAutocompletion: true,
-                    enableLiveAutocompletion: true
-                });
+            handleResize: function() {
                 this.editor.resize();
+            }
+        },
+        mounted() {
 
-                Event.$on('compile', this.compile);
-                Event.$on('deploy', this.compileAndDeploy);
-                Event.$on('resizeEditor', this.handleResize);
+            this.langTools = ace.acequire('ace/ext/language_tools');
+            this.langTools.setCompleters([this.langTools.keyWordCompleter]);
+
+            this.editor = ace.edit('editor' + this._uid);
+            this.editor.getSession().setMode('ace/mode/solidity');
+            this.editor.setTheme('ace/theme/tomorrow_night');
+            this.editor.setOptions({
+                autoScrollEditorIntoView: true,
+                showPrintMargin: false,
+                enableBasicAutocompletion: true,
+                enableLiveAutocompletion: true
+            });
+            this.editor.resize();
+
+            Event.$on('compile', this.compile);
+            Event.$on('deploy', this.compileAndDeploy);
+            Event.$on('resizeEditor', this.handleResize);
 
             this.load(this.fileName);  // TODO handle multiple files
         },
