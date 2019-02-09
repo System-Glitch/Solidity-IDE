@@ -18,16 +18,23 @@ import AccountManager from './js/AccountManager.js';
 window.accountManager = new AccountManager();
 
 var isCtrl = false;
-document.onkeyup=function(e){
+document.onkeyup = function(e){
     if(e.keyCode == 17) isCtrl = false;
 }
 
-document.onkeydown=function(e){
+document.onkeydown = function(e){
     if(e.keyCode == 17) isCtrl = true;
     if(e.keyCode == 83 && isCtrl == true) {
         Event.$emit('compile');
         return false;
     }
+}
+
+document.onwheel = function(e) {
+	if(e.ctrlKey) {
+		e.preventDefault();
+		Event.$emit('fontSize', e.deltaY < 0);
+	}
 }
 
 new Vue({

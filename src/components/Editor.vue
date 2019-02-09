@@ -25,6 +25,7 @@
             return {
                 editor: null,
                 langTools: null,
+                fontSize: 14,
                 content: [],
             }
         },
@@ -183,6 +184,15 @@
             },
             handleResize: function() {
                 this.editor.resize();
+            },
+            handleFontSize: function(up) {
+                up ? this.fontSize++ : this.fontSize--;
+
+                if(this.fontSize < 8) this.fontSize = 8;
+                if(this.fontSize > 40) this.fontSize = 40;
+
+                localStorage['font-size'] = this.fontSize;
+                this.editor.setFontSize(this.fontSize);
             }
         },
         mounted() {
@@ -199,11 +209,15 @@
                 enableBasicAutocompletion: true,
                 enableLiveAutocompletion: true
             });
+
+            this.fontSize = localStorage['font-size'] ? parseInt(localStorage['font-size']) : 14;
+            this.editor.setFontSize(this.fontSize);
             this.editor.resize();
 
             Event.$on('compile', this.compile);
             Event.$on('deploy', this.compileAndDeploy);
             Event.$on('resizeEditor', this.handleResize);
+            Event.$on('fontSize', this.handleFontSize);
 
             this.load(this.fileName);  // TODO handle multiple files
         },
@@ -211,6 +225,7 @@
             Event.$off('compile', this.compile);
             Event.$off('deploy', this.compileAndDeploy);
             Event.$off('resizeEditor', this.handleResize);
+            Event.$off('fontSize', this.handleFontSize);
             this.editor.destroy();
         }
     }

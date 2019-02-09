@@ -107,7 +107,8 @@
             this.editor.setOptions({
                 autoScrollEditorIntoView: true,
                 showPrintMargin: false,
-                readOnly: true
+                readOnly: true,
+                fontSize: 14,
             });
             this.editor.resize();
         }
