@@ -1,0 +1,28 @@
+/* nunito-regular - latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Nunito Regular'), local('Nunito-Regular'),
+       url('~@/assets/fonts/nunito-v9-latin-regular.woff2') format('woff2'), 
+       url('~@/assets/fonts/nunito-v9-latin-regular.woff') format('woff');
+}
+
+/* nunito-700 - latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Nunito Bold'), local('Nunito-Bold'),
+       url('~@/assets/fonts/nunito-v9-latin-700.woff2') format('woff2'),
+       url('~@/assets/fonts/nunito-v9-latin-700.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'Monospace', monospace;
+    src: local('Monospace')
+         url('~@/assets/fonts/Monospace.woff2') format('woff2'),
+         url('~@/assets/fonts/Monospace.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
