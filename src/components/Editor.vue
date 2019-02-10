@@ -1,7 +1,7 @@
 <template>
     <div class="flex-grow-1">
         <div class="h-100" v-on:resize="handleResize">
-            <div :id="'editor' + _uid" class="h-100 w-100 monospace"></div>
+            <div :id="'editor' + _uid" class="h-100 w-100"></div>
         </div>
     </div>
 </template>
@@ -207,7 +207,8 @@
                 autoScrollEditorIntoView: true,
                 showPrintMargin: false,
                 enableBasicAutocompletion: true,
-                enableLiveAutocompletion: true
+                enableLiveAutocompletion: true,
+                fontFamily: "'Monospace', monospace"
             });
 
             this.fontSize = localStorage['font-size'] ? parseInt(localStorage['font-size']) : 14;

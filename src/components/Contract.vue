@@ -108,6 +108,7 @@
                 autoScrollEditorIntoView: true,
                 showPrintMargin: false,
                 readOnly: true,
+                fontFamily: "'Monospace', monospace",
                 fontSize: 14,
             });
             this.editor.resize();
