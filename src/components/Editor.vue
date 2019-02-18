@@ -66,6 +66,7 @@
                 });
             },
             deploy: function(contractName, compiledContract) {
+                this.checkAbi(compiledContract.abi);
                 const contract = new window.web3.eth.Contract(compiledContract.abi);
                 const activeAccount = window.accountManager.getActiveAccount();
                 GlobalEvent.$emit('processing', true);
@@ -102,6 +103,22 @@
                     }
 
                 }.bind(this));
+            },
+            checkAbi: function(abi) { // Checks if abi contains a least one constructor. Injects default one if missing
+                for(let key in abi) {
+                    const method = abi[key];
+                    if(method.type == "constructor")
+                        return;
+                }
+
+                abi.push({
+                    constant: undefined,
+                    inputs: [],
+                    payable: false,
+                    signature: "constructor",
+                    stateMutability: "nonpayable",
+                    type: "constructor"
+                });
             },
             save: function() {
                 localStorage[this.fileName] = this.editor.getValue(); // TODO handle multiple files
