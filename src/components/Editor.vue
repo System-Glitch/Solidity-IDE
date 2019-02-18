@@ -38,33 +38,28 @@
                 const data = {};
                 data[this.fileName] = this.editor.getValue();
 
-                window.$.ajax({
-                    method: 'POST',
-                    url: 'http://localhost:8081/compile',
-                    crossDomain: true,
-                    dataType: 'json',
-                    data: data
-                }).done(function(data) {
+                window.axios.post('http://localhost:8081/compile', data)
+                .then(function(response) {
                     this.clearMarkers();
                     this.editor.getSession().clearAnnotations();
-                    if(data.contracts != undefined) {
-                        for(let key in data.contracts) {
+                    if(response.data.contracts != undefined) {
+                        for(let key in response.data.contracts) {
                             Event.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
                             if(callback != undefined) {
-                                callback(data.contracts[key]);
+                                callback(response.data.contracts[key]);
                             }
                         }
                     }
-                    if(data.errors != undefined) {
-                        Event.$emit('messages', data.errors);
-                        this.editor.getSession().setAnnotations(this.buildAnnotations(data.errors));
+                    if(response.data.errors != undefined) {
+                        Event.$emit('messages', response.data.errors);
+                        this.editor.getSession().setAnnotations(this.buildAnnotations(response.data.errors));
                     }
-                    if(callback == undefined || data.contracts == undefined) {
+                    if(callback == undefined || response.data.contracts == undefined) {
                         Event.$emit('processing', false);
                     }
                 }.bind(this))
-                .fail(function( jqXHR ) {
-                    Event.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed with status " + jqXHR.status + ": " + jqXHR.responseText });
+                .catch(function( error ) {
+                    Event.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed with status " + error.status + ": " + error.message });
                     Event.$emit('processing', false);
                 });
             },

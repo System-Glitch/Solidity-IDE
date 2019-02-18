@@ -61,7 +61,7 @@
             this.horizontalSplit.destroy();
             this.verticalSplit.destroy();
         }
-    }
+    };
 </script>
 <style scoped lang="scss">
 @import 'sass/app.scss';

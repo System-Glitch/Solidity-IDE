@@ -12,7 +12,7 @@ window.Event = new Vue;
 const Web3 = require('web3');
 window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
 
-window.$ = require('jquery');
+window.axios = require('axios');
 
 import AccountManager from './js/AccountManager.js';
 window.accountManager = new AccountManager();
