@@ -32,10 +32,10 @@
         },
         methods: {
             compile: function() {
-                Event.$emit('compile');
+                GlobalEvent.$emit('compile');
             },
             deploy: function() {
-                Event.$emit('deploy');
+                GlobalEvent.$emit('deploy');
             },
             dismiss: function(message) {
                 this.messages.splice(this.messages.indexOf(message), 1);
@@ -65,16 +65,16 @@
             }
         },
         mounted() {
-            Event.$on('messages', this.addMessages);
-            Event.$on('message', this.addMessage);
-            Event.$on('clearMessages', this.clearMessages);
-            Event.$on('processing', this.setProcessing);
+            GlobalEvent.$on('messages', this.addMessages);
+            GlobalEvent.$on('message', this.addMessage);
+            GlobalEvent.$on('clearMessages', this.clearMessages);
+            GlobalEvent.$on('processing', this.setProcessing);
         },
         beforeDestroy() {
-            Event.$off('messages', this.addMessages);
-            Event.$off('message', this.addMessage);
-            Event.$off('clearMessages', this.clearMessages);
-            Event.$off('processing', this.setProcessing);
+            GlobalEvent.$off('messages', this.addMessages);
+            GlobalEvent.$off('message', this.addMessage);
+            GlobalEvent.$off('clearMessages', this.clearMessages);
+            GlobalEvent.$off('processing', this.setProcessing);
         }
     }
 </script>

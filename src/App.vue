@@ -40,7 +40,7 @@
                 gutterSize: 3,
                 snapOffset: 1,
                 onDragEnd: (sizes) => {
-                    Event.$emit('resizeEditor');
+                    GlobalEvent.$emit('resizeEditor');
                     localStorage.setItem('split-sizes-horizontal', JSON.stringify(sizes));
                 },
             });
@@ -51,11 +51,11 @@
                 snapOffset: 1,
                 direction: 'vertical',
                 onDragEnd: (sizes) => {
-                    Event.$emit('resizeEditor');
+                    GlobalEvent.$emit('resizeEditor');
                     localStorage.setItem('split-sizes-vertical', JSON.stringify(sizes));
                 },
             });
-            Event.$emit('resizeEditor');
+            GlobalEvent.$emit('resizeEditor');
         },
         beforeDestroy() {
             this.horizontalSplit.destroy();

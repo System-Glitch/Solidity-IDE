@@ -31,7 +31,7 @@
 
                 if(this.contracts.length == 0) {
                     setTimeout(() => {
-                        Event.$emit('resizeEditor');
+                        GlobalEvent.$emit('resizeEditor');
                     }, 0);
                 }
             },
@@ -41,10 +41,11 @@
 
                 if(this.contracts.length == 0) {
                     setTimeout(() => {
-                        Event.$emit('resizeEditor');
+                        GlobalEvent.$emit('resizeEditor');
                     }, 0);
                 }
 
+                Object.freeze(contract);
                 this.contracts.push(contract);
             },
             updateContractsCounter: function(contract) {
@@ -67,10 +68,10 @@
             }
         },
         mounted() {
-            Event.$on('contract', this.onContractCreated);
+            GlobalEvent.$on('contract', this.onContractCreated);
         },
         beforeDestroy() {
-            Event.$off('contract', this.onContractCreated);
+            GlobalEvent.$off('contract', this.onContractCreated);
         }
     }
 </script>

@@ -79,12 +79,12 @@
                         .on('error', (result) => {
                             this.editor.getSession().setMode(null);
                             this.setMessage(result.message);
-                            Event.$emit('refreshAccounts', "all");
+                            GlobalEvent.$emit('refreshAccounts', "all");
                         })
                         .on('receipt', (result) => {
                             this.editor.getSession().setMode('ace/mode/json');
                             this.setMessage(JSON.stringify(result, null, 4));
-                            Event.$emit('refreshAccounts', "all");
+                            GlobalEvent.$emit('refreshAccounts', "all");
                         });
                     }
                 } catch(error) {

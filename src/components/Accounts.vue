@@ -75,7 +75,7 @@
                     }
                 })
                 .catch((error) => {
-                    Event.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch accounts: " + error.message});
+                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch accounts: " + error.message});
                 });
             },
             updateAccount: function(account, callback) {
@@ -87,16 +87,16 @@
                     }
                 })
                 .catch((error) => {
-                    Event.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch account " + account + ": " + error.message});
+                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch account " + account + ": " + error.message});
                 });
             }
         },
         mounted() {
             this.updateAccounts();
-            Event.$on('refreshAccounts', this.refreshAccounts);
+            GlobalEvent.$on('refreshAccounts', this.refreshAccounts);
         },
         beforeDestroy() {
-            Event.$off('refreshAccounts', this.refreshAccounts);
+            GlobalEvent.$off('refreshAccounts', this.refreshAccounts);
         }
     }
 </script>

@@ -30,14 +30,14 @@
     "brace": "^0.11.1",
     "core-js": "^2.6.5",
     "es6-promise": "^4.2.6",
-    "eslint": "^5.14.0",
+    "eslint": "^5.14.1",
     "eslint-plugin-vue": "^5.2.2",
     "node-sass": "^4.11.0",
     "sass-loader": "^7.1.0",
     "split.js": "^1.5.10",
     "vue": "^2.6.6",
     "vue-template-compiler": "^2.6.6",
-    "web3": "1.0.0-beta.34",
+    "web3": "^1.0.0-beta.46",
     "webpack": "^4.29.5"
   },
   "eslintConfig": {

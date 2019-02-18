@@ -32,8 +32,8 @@
         methods: {
             compile: function(callback) {
                 this.save();
-                Event.$emit('clearMessages');
-                Event.$emit('processing', true);
+                GlobalEvent.$emit('clearMessages');
+                GlobalEvent.$emit('processing', true);
 
                 const data = {};
                 data[this.fileName] = this.editor.getValue();
@@ -44,29 +44,32 @@
                     this.editor.getSession().clearAnnotations();
                     if(response.data.contracts != undefined) {
                         for(let key in response.data.contracts) {
-                            Event.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
+                            GlobalEvent.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
                             if(callback != undefined) {
                                 callback(response.data.contracts[key]);
                             }
                         }
+                    } else if(response.data.errors == undefined) {
+                        GlobalEvent.$emit('message', {severity: 'success', formattedMessage: "Compilation successful."});
                     }
                     if(response.data.errors != undefined) {
-                        Event.$emit('messages', response.data.errors);
+                        GlobalEvent.$emit('messages', response.data.errors);
                         this.editor.getSession().setAnnotations(this.buildAnnotations(response.data.errors));
                     }
                     if(callback == undefined || response.data.contracts == undefined) {
-                        Event.$emit('processing', false);
+                        GlobalEvent.$emit('processing', false);
                     }
                 }.bind(this))
                 .catch(function( error ) {
-                    Event.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed: " + error.message });
-                    Event.$emit('processing', false);
+                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed: " + error.message });
+                    GlobalEvent.$emit('processing', false);
                 });
             },
             deploy: function(contractName, compiledContract) {
                 const contract = new window.web3.eth.Contract(compiledContract.abi);
                 const activeAccount = window.accountManager.getActiveAccount();
-                Event.$emit('processing', true);
+                GlobalEvent.$emit('processing', true);
+
                 contract.deploy({
                     data: compiledContract.evm.bytecode.object,
                 }).send({
@@ -74,20 +77,20 @@
                     gas: '4700000',
                 }).then((contract) => {
                     if (typeof contract.options !== 'undefined') {
-                        Event.$emit('message', {severity: 'success', formattedMessage: contractName + ": Deploy success.\nContract address: " + contract.options.address});
-                        Event.$emit('contract', {contract: contract, abi: compiledContract.abi, name: contractName});
-                        Event.$emit('refreshAccounts', [activeAccount.address]);
+                        GlobalEvent.$emit('message', {severity: 'success', formattedMessage: contractName + ": Deploy success.\nContract address: " + contract.options.address});
+                        GlobalEvent.$emit('contract', {contract: contract, abi: compiledContract.abi, name: contractName});
+                        GlobalEvent.$emit('refreshAccounts', [activeAccount.address]);
                     }
-                    Event.$emit('processing', false);
+                    GlobalEvent.$emit('processing', false);
                 }).catch((error) => {
-                    Event.$emit('message', {severity: 'error', formattedMessage: "Deploy failed: " + error.message});
-                    Event.$emit('processing', false);
+                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Deploy failed: " + error.message});
+                    GlobalEvent.$emit('processing', false);
                 });
             },
             compileAndDeploy: function() {
                 this.compile(function(contracts) {
                     if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
-                        Event.$emit('refreshAccounts', window.accountManager.selectedAccount, () => {
+                        GlobalEvent.$emit('refreshAccounts', window.accountManager.selectedAccount, () => {
                             for(let key in contracts) {
                                 this.deploy(key, contracts[key]);
                             }
@@ -210,18 +213,18 @@
             this.editor.setFontSize(this.fontSize);
             this.editor.resize();
 
-            Event.$on('compile', this.compile);
-            Event.$on('deploy', this.compileAndDeploy);
-            Event.$on('resizeEditor', this.handleResize);
-            Event.$on('fontSize', this.handleFontSize);
+            GlobalEvent.$on('compile', this.compile);
+            GlobalEvent.$on('deploy', this.compileAndDeploy);
+            GlobalEvent.$on('resizeEditor', this.handleResize);
+            GlobalEvent.$on('fontSize', this.handleFontSize);
 
             this.load(this.fileName);  // TODO handle multiple files
         },
         beforeDestroy() {
-            Event.$off('compile', this.compile);
-            Event.$off('deploy', this.compileAndDeploy);
-            Event.$off('resizeEditor', this.handleResize);
-            Event.$off('fontSize', this.handleFontSize);
+            GlobalEvent.$off('compile', this.compile);
+            GlobalEvent.$off('deploy', this.compileAndDeploy);
+            GlobalEvent.$off('resizeEditor', this.handleResize);
+            GlobalEvent.$off('fontSize', this.handleFontSize);
             this.editor.destroy();
         }
     }
