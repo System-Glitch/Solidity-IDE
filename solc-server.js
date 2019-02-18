@@ -36,6 +36,11 @@ app.post('/compile', function (req, res) {
     res.end(output)
 })
 
+app.get('/shutdown', function() {
+    console.log('IDE closed, exiting.')
+    process.exit(0)
+})
+
 app.listen(8081, function () {
     console.log('Started solc server on port 8081.')
 })

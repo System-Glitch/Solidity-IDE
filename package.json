@@ -46,6 +46,10 @@
       "browser": true,
       "node": true
     },
+    "globals": {
+      "GlobalEvent": true,
+      "axios": true
+    },
     "extends": [
       "plugin:vue/essential",
       "eslint:recommended"

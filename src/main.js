@@ -41,6 +41,11 @@ document.onwheel = function(e) {
 	}
 }
 
+window.onbeforeunload = function() {
+    // Shutdown server if tab closed
+    axios.get('http://localhost:8081/shutdown');
+}
+
 new Vue({
     render: h => h(App),
 }).$mount('#app')
