@@ -59,7 +59,7 @@
                     }
                 }.bind(this))
                 .catch(function( error ) {
-                    Event.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed with status " + error.status + ": " + error.message });
+                    Event.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed: " + error.message });
                     Event.$emit('processing', false);
                 });
             },
