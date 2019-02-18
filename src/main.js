@@ -29,7 +29,7 @@ document.onkeyup = function(e){
 document.onkeydown = function(e){
     if(e.keyCode == 17) isCtrl = true;
     if(e.keyCode == 83 && isCtrl == true) {
-        Event.$emit('compile');
+        GlobalEvent.$emit('compile');
         return false;
     }
 }
