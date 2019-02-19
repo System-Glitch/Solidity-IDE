@@ -50,7 +50,9 @@
                             }
                         }
                     } else if(response.data.errors == undefined) {
-                        GlobalEvent.$emit('message', {severity: 'success', formattedMessage: "Compilation successful."});
+                        for(let key in response.data.sources) {
+                            GlobalEvent.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
+                        }
                     }
                     if(response.data.errors != undefined) {
                         GlobalEvent.$emit('messages', response.data.errors);

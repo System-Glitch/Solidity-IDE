@@ -57,7 +57,8 @@
                 }
             },
             updateAccounts: function(callback) {
-                window.web3.eth.getAccounts().then((accounts) => {
+                window.web3.eth.getAccounts()
+                .then((accounts) => {
                     const temp = [];
                     for(let key in accounts) {
                         const account = accounts[key];
