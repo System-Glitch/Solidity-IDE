@@ -15,18 +15,15 @@
 
     export default {
         name: "editor",
-        props: {
-            fileName: {
-                type: String,
-                default: 'contract.sol' // TODO file name
-            }
-        },
         data: function() {
             return {
                 editor: null,
                 langTools: null,
                 fontSize: 14,
                 content: [],
+                fileName: '',
+                sessions: {},
+                defaultSession: null
             }
         },
         methods: {
@@ -123,12 +120,19 @@
                 });
             },
             save: function() {
-                localStorage[this.fileName] = this.editor.getValue(); // TODO handle multiple files
+                localStorage[this.fileName] = this.editor.getValue();
             },
             load: function(contract) {
-                if(localStorage[contract]) {
-                    const session = ace.createEditSession(localStorage[contract], 'ace/mode/solidity');
-                    this.editor.setSession(session);
+                if(localStorage[contract] != undefined) {
+
+                    if(this.sessions[contract] == undefined) {
+                        this.sessions[contract] = ace.createEditSession(localStorage[contract], 'ace/mode/solidity');
+                    }
+                    this.fileName = contract;
+                    localStorage.setItem('openFile', contract);
+                    this.editor.setSession(this.sessions[contract]);
+                    this.editor.setReadOnly(false);
+                    this.editor.focus();
                 }
             },
             buildAnnotations: function(errors) {
@@ -210,6 +214,15 @@
 
                 localStorage['font-size'] = this.fontSize;
                 this.editor.setFontSize(this.fontSize);
+            },
+            handleFileDelete: function(file) {
+                if(this.sessions[file] != undefined) {
+                    if(file == this.fileName) {
+                        this.editor.setSession(this.defaultSession);
+                        this.editor.setReadOnly(true);
+                    }
+                    delete this.sessions[file];
+                }
             }
         },
         mounted() {
@@ -218,6 +231,7 @@
             this.langTools.setCompleters([this.langTools.keyWordCompleter]);
 
             this.editor = ace.edit('editor' + this._uid);
+            this.defaultSession = this.editor.getSession();
             this.editor.getSession().setMode('ace/mode/solidity');
             this.editor.setTheme('ace/theme/tomorrow_night');
             this.editor.setOptions({
@@ -227,6 +241,7 @@
                 enableLiveAutocompletion: true,
                 fontFamily: "'Monospace', monospace"
             });
+            this.editor.setReadOnly(true);
 
             this.fontSize = localStorage['font-size'] ? parseInt(localStorage['font-size']) : 14;
             this.editor.setFontSize(this.fontSize);
@@ -236,14 +251,20 @@
             GlobalEvent.$on('deploy', this.compileAndDeploy);
             GlobalEvent.$on('resizeEditor', this.handleResize);
             GlobalEvent.$on('fontSize', this.handleFontSize);
+            GlobalEvent.$on('fileSelected', this.load);
+            GlobalEvent.$on('fileDeleted', this.handleFileDelete);
 
-            this.load(this.fileName);  // TODO handle multiple files
+            if(localStorage['openFile']) {
+                this.load(localStorage['openFile']);
+            }
         },
         beforeDestroy() {
             GlobalEvent.$off('compile', this.compile);
             GlobalEvent.$off('deploy', this.compileAndDeploy);
             GlobalEvent.$off('resizeEditor', this.handleResize);
             GlobalEvent.$off('fontSize', this.handleFontSize);
+            GlobalEvent.$off('fileSelected', this.load);
+            GlobalEvent.$off('fileDeleted', this.handleFileDelete);
             this.editor.destroy();
         }
     }

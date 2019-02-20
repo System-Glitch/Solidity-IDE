@@ -1,5 +1,5 @@
 <template>
-    <div class="d-flex flex-column" id="sidebar">
+    <div class="d-flex flex-column">
         <accounts/>
         <messages/>
     </div>
