@@ -23,6 +23,7 @@
                 content: [],
                 fileName: '',
                 sessions: {},
+                errors: undefined,
                 defaultSession: null
             }
         },
@@ -42,17 +43,16 @@
 
                 window.axios.post('http://localhost:8081/compile', data)
                 .then(function(response) {
-                    var hasErrors = false;
-                    this.clear();
-                    if(response.data.errors != undefined) {
-                        hasErrors = this.checkHasErrors(response.data.errors);
-                        GlobalEvent.$emit('messages', response.data.errors);
-                        this.buildAnnotations(response.data.errors);
+                    this.errors = response.data.errors;
+                    this.updateAnnotations();
+                    if(this.errors != undefined) {
+                        GlobalEvent.$emit('messages', this.errors);
                     }
 
-                    if(!hasErrors) {
+                    if(!this.checkHasErrors()) {
                         GlobalEvent.$emit('message', {severity: 'success', formattedMessage: "Compilation successful."});
                     }
+
                     if(callback == undefined || response.data.contracts == undefined) {
                         GlobalEvent.$emit('processing', false);
                     }
@@ -108,6 +108,12 @@
                     session.clearAnnotations();
                 }
             },
+            updateAnnotations: function() {
+                this.clear();
+                if(this.errors != undefined) {
+                    this.buildAnnotations();
+                }
+            },
             checkAbi: function(abi) { // Checks if abi contains a least one constructor. Injects default one if missing
                 for(let key in abi) {
                     const method = abi[key];
@@ -124,10 +130,12 @@
                     type: "constructor"
                 });
             },
-            checkHasErrors: function(errors) {
-                for(let key in errors) {
-                    if(errors[key].severity == 'error') {
-                        return true;
+            checkHasErrors: function() {
+                if(this.errors != undefined) {
+                    for(let key in this.errors) {
+                        if(this.errors[key].severity == 'error') {
+                            return true;
+                        }
                     }
                 }
                 return false;
@@ -143,6 +151,7 @@
                 }
             },
             load: function(file) {
+                var needUpdate = false;
                 if(localStorage[file] != undefined) {
 
                     if(this.sessions[file] == undefined) {
@@ -150,17 +159,22 @@
                         this.sessions[file].on('change', function() {
                             GlobalEvent.$emit('fileChanged', file);
                         });
+                        needUpdate = true;
                     }
                     this.fileName = file;
                     localStorage.setItem('openFile', file);
                     this.editor.setSession(this.sessions[file]);
                     this.editor.setReadOnly(false);
                     this.editor.focus();
+
+                    if(needUpdate) {
+                        this.updateAnnotations();
+                    }
                 }
             },
-            buildAnnotations: function(errors) {
-                for(let key in errors) {
-                    const message = errors[key];
+            buildAnnotations: function() {
+                for(let key in this.errors) {
+                    const message = this.errors[key];
                     const session = this.sessions[message.sourceLocation.file];
 
                     if(session != undefined) {
