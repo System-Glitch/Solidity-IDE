@@ -43,12 +43,11 @@
                 window.axios.post('http://localhost:8081/compile', data)
                 .then(function(response) {
                     var hasErrors = false;
-                    this.clearMarkers();
-                    this.editor.getSession().clearAnnotations();
+                    this.clear();
                     if(response.data.errors != undefined) {
                         hasErrors = this.checkHasErrors(response.data.errors);
                         GlobalEvent.$emit('messages', response.data.errors);
-                        this.editor.getSession().setAnnotations(this.buildAnnotations(response.data.errors));
+                        this.buildAnnotations(response.data.errors);
                     }
 
                     if(!hasErrors) {
@@ -102,6 +101,13 @@
 
                 }.bind(this));
             },
+            clear: function() {
+                for(let key in this.sessions) {
+                    const session = this.sessions[key];
+                    this.clearMarkers(session);
+                    session.clearAnnotations();
+                }
+            },
             checkAbi: function(abi) { // Checks if abi contains a least one constructor. Injects default one if missing
                 for(let key in abi) {
                     const method = abi[key];
@@ -153,39 +159,40 @@
                 }
             },
             buildAnnotations: function(errors) {
-                const result = [];
                 for(let key in errors) {
                     const message = errors[key];
+                    const session = this.sessions[message.sourceLocation.file];
 
-                    if(message.sourceLocation.file == this.fileName) {
-                        const rowStart = this.getRowAtPosition(message.sourceLocation.start);
-                        const rowEnd = this.getRowAtPosition(message.sourceLocation.end);
-                        const colStart = message.sourceLocation.start - this.getStartPositionForRow(rowStart) - 1;
-                        const colEnd = message.sourceLocation.end - this.getStartPositionForRow(rowEnd) - 1;
+                    if(session != undefined) {
+                        const rowStart = this.getRowAtPosition(session, message.sourceLocation.start);
+                        const rowEnd = this.getRowAtPosition(session, message.sourceLocation.end);
+                        const colStart = message.sourceLocation.start - this.getStartPositionForRow(session, rowStart) - 1;
+                        const colEnd = message.sourceLocation.end - this.getStartPositionForRow(session, rowEnd) - 1;
 
                         const annotation = {
                             row: rowStart,
                             column: colStart,
                             text: message.message,
                             type: message.severity
-                        }
-                        result.push(annotation);
+                        };
+
                         const range = new Range(rowStart, colStart, rowEnd, colEnd);
-                        this.editor.getSession().addMarker(range, this.getMarkerClass(message.severity), "line", false);
+                        session.addMarker(range, this.getMarkerClass(message.severity), "line", false);
+                        session.getAnnotations().push(annotation);
+                        session.setAnnotations(session.getAnnotations());
                     }
                 }
-                return result;
             },
-            clearMarkers: function() {
-                const markers = this.editor.getSession().getMarkers();
+            clearMarkers: function(session) {
+                const markers = session.getMarkers();
                 for(let key in markers) {
                     const marker = markers[key];
                     if(marker.clazz.indexOf('marker-') == 0)
-                        this.editor.getSession().removeMarker(marker.id);
+                        session.removeMarker(marker.id);
                 }
             },
-            getRowAtPosition: function(pos) {
-                const text = this.editor.getValue();
+            getRowAtPosition: function(session, pos) {
+                const text = session.getValue();
                 var count = 0;
                 for(let i = 0 ; i < pos ; i++) {
                     if(text.charAt(i) == '\n') {
@@ -194,8 +201,8 @@
                 }
                 return count;
             },
-            getStartPositionForRow: function(row) {
-                const text = this.editor.getValue();
+            getStartPositionForRow: function(session, row) {
+                const text = session.getValue();
                 const length = text.length;
                 var count = 0;
 

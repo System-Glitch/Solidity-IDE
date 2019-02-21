@@ -18,7 +18,12 @@
                 class="p-1 px-2 d-flex" v-bind:class="selected == file ? 'active' : ''"
                 :title="file.name"
                 v-on:click="select(file)">
-                <span class="text-nowrap text-truncate w-100"><span v-if="!file.saved">*&nbsp;</span>{{ file.name }}</span>
+                <span class="text-nowrap text-truncate w-100">
+                    <span class="ace_gutter-cell ace_error" v-if="file.state == 2"></span>
+                    <span class="ace_gutter-cell ace_warning" v-if="file.state == 1"></span>
+                    <span v-if="!file.saved">*&nbsp;</span>
+                    {{ file.name }}
+                </span>
                 <button type="button" aria-label="Close" class="close" @click="clickDelete(file, $event)">×</button>
             </b-list-group-item>
         </b-list-group>
@@ -60,7 +65,7 @@
                 for (let i = 0; i < localStorage.length; i++){
                     const key = localStorage.key(i);
                     if(key.endsWith('.sol')) {
-                        this.files.push({name: key, saved: true});
+                        this.files.push({name: key, saved: true, state: 0});
                     }
                 }
 
@@ -79,7 +84,7 @@
                     name += '.sol';
 
                 localStorage.setItem(name, '');
-                const obj = {name: name, saved: true};
+                const obj = {name: name, saved: true, state: 0};
                 this.files.push(obj);
                 this.files.sort(this.sort);
 
@@ -137,6 +142,29 @@
             handleFileSaved: function(fileName) {
                 this.setFileSaved(fileName, true);
             },
+            handleFileState: function(messages) {
+                this.resetStates();
+                for(let key in messages) {
+                    const message = messages[key];
+                    const file = this.findFile(message.sourceLocation.file);
+                    if(file != null) {
+                        const newState = this.getStateFromSeverity(message.severity);
+                        file.state = file.state < newState ? newState : file.state;
+                    }
+                }
+            },
+            resetStates: function() {
+                for(let key in this.files) {
+                    this.files[key].state = 0;
+                }
+            },
+            getStateFromSeverity: function(severity) {
+                switch(severity) {
+                    case 'error': return 2;
+                    case 'warning': return 1;
+                    default: return 0;
+                }
+            },
             findFile: function(fileName) {
                 for(let key in this.files) {
                     if(this.files[key].name == fileName) {
@@ -157,6 +185,7 @@
             GlobalEvent.$on('previousFile', this.handlePreviousFile);
             GlobalEvent.$on('fileChanged', this.handleFileChanged);
             GlobalEvent.$on('fileSaved', this.handleFileSaved);
+            GlobalEvent.$on('messages', this.handleFileState);
 
             this.updateFileList();
 
@@ -169,6 +198,7 @@
             GlobalEvent.$off('previousFile', this.handlePreviousFile);
             GlobalEvent.$off('fileChanged', this.handleFileChanged);
             GlobalEvent.$off('fileSaved', this.handleFileSaved);
+            GlobalEvent.$off('messages', this.handleFileState);
         }
     }
 </script>
