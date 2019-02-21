@@ -36,7 +36,7 @@
             footer-bg-variant="dark" footer-text-variant="light"
             ok-variant="danger" cancel-variant="primary"
         >
-            <p>Are you sure you want to delete <strong class="monospace text-info">{{ deletingFile }}</strong>?</p>
+            <p>Are you sure you want to delete <strong class="monospace text-warning">{{ deletingFile }}</strong>?</p>
             <p>This action cannot be undone!</p>
         </b-modal>
     </div>
