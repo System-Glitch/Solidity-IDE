@@ -14,11 +14,11 @@
         <div class="scrollable">
             <b-list-group>
                 <b-list-group-item
-                v-for="file in files" v-bind:key="file"
+                v-for="file in files" v-bind:key="file.name"
                 class="p-1 px-2 d-flex" v-bind:class="selected == file ? 'active' : ''"
-                :title="file"
+                :title="file.name"
                 v-on:click="select(file)">
-                <span class="text-nowrap text-truncate w-100">{{ file }}</span>
+                <span class="text-nowrap text-truncate w-100"><span v-if="!file.saved">*&nbsp;</span>{{ file.name }}</span>
                 <button type="button" aria-label="Close" class="close" @click="clickDelete(file, $event)">×</button>
             </b-list-group-item>
         </b-list-group>
@@ -36,7 +36,7 @@
             footer-bg-variant="dark" footer-text-variant="light"
             ok-variant="danger" cancel-variant="primary"
         >
-            <p>Are you sure you want to delete <strong class="monospace text-warning">{{ deletingFile }}</strong>?</p>
+            <p>Are you sure you want to delete <strong class="monospace text-warning" v-if="deletingFile">{{ deletingFile.name }}</strong>?</p>
             <p>This action cannot be undone!</p>
         </b-modal>
     </div>
@@ -48,8 +48,8 @@
         name: "browser",
         data: function() {
             return {
-                selected: '',
-                deletingFile: '',
+                selected: null,
+                deletingFile: null,
                 newFile: '',
                 files: []
             }
@@ -60,16 +60,16 @@
                 for (let i = 0; i < localStorage.length; i++){
                     const key = localStorage.key(i);
                     if(key.endsWith('.sol')) {
-                        this.files.push(key);
+                        this.files.push({name: key, saved: true});
                     }
                 }
 
-                this.files.sort();
+                this.files.sort(this.sort);
                 this.updateSelection();
             },
             updateSelection: function() {
                 if(this.files.length > 0 && this.files.indexOf(this.selected) == -1) {
-                    this.select(this.files[0]);
+                    this.selectIndex(0);
                 }
             },
             create: function() {
@@ -79,12 +79,13 @@
                     name += '.sol';
 
                 localStorage.setItem(name, '');
-                this.files.push(name);
-                this.files.sort();
+                const obj = {name: name, saved: true};
+                this.files.push(obj);
+                this.files.sort(this.sort);
 
                 this.newFile = '';
 
-                this.select(name);
+                this.select(obj);
             },
             clickDelete: function(file, event) {
                 this.deletingFile = file;
@@ -94,22 +95,22 @@
                     event.stopPropagation();
             },
             cancelDelete: function() {
-                this.deletingFile = '';
+                this.deletingFile = null;
             },
             deleteFile: function() {
                 const index = this.files.indexOf(this.deletingFile);
                 if(index != -1) {
                     this.files.splice(index, 1);
-                    localStorage.removeItem(this.deletingFile);
-                    GlobalEvent.$emit('fileDeleted', this.deletingFile);
-                    this.deletingFile = '';
+                    localStorage.removeItem(this.deletingFile.name);
+                    GlobalEvent.$emit('fileDeleted', this.deletingFile.name);
+                    this.deletingFile = null;
 
                     this.updateSelection();
                 }
             },
             select: function(file) {
                 this.selected = file;
-                GlobalEvent.$emit('fileSelected', this.selected);
+                GlobalEvent.$emit('fileSelected', this.selected.name);
             },
             selectIndex: function(index) {
                 this.select(this.files[index]);
@@ -129,21 +130,45 @@
                 } else {
                     this.selectIndex(index - 1);
                 }
+            },
+            handleFileChanged: function(fileName) {
+                this.setFileSaved(fileName, false);
+            },
+            handleFileSaved: function(fileName) {
+                this.setFileSaved(fileName, true);
+            },
+            findFile: function(fileName) {
+                for(let key in this.files) {
+                    if(this.files[key].name == fileName) {
+                        return this.files[key];
+                    }
+                }
+                return null;
+            },
+            setFileSaved: function(fileName, saved) {
+                this.findFile(fileName).saved = saved;
+            },
+            sort: function(a, b) {
+                return a.name.localeCompare(b.name);
             }
         },
         mounted() {
             GlobalEvent.$on('nextFile', this.handleNextFile);
             GlobalEvent.$on('previousFile', this.handlePreviousFile);
+            GlobalEvent.$on('fileChanged', this.handleFileChanged);
+            GlobalEvent.$on('fileSaved', this.handleFileSaved);
 
             this.updateFileList();
 
             if(localStorage['openFile']) {
-                this.selected = localStorage['openFile'];
+                this.selected = this.findFile(localStorage['openFile']);
             }
         },
         beforeDestroy() {
             GlobalEvent.$off('nextFile', this.handleNextFile);
             GlobalEvent.$off('previousFile', this.handlePreviousFile);
+            GlobalEvent.$off('fileChanged', this.handleFileChanged);
+            GlobalEvent.$off('fileSaved', this.handleFileSaved);
         }
     }
 </script>

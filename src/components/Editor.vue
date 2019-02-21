@@ -121,16 +121,20 @@
             },
             save: function() {
                 localStorage[this.fileName] = this.editor.getValue();
+                GlobalEvent.$emit('fileSaved', this.fileName);
             },
-            load: function(contract) {
-                if(localStorage[contract] != undefined) {
+            load: function(file) {
+                if(localStorage[file] != undefined) {
 
-                    if(this.sessions[contract] == undefined) {
-                        this.sessions[contract] = ace.createEditSession(localStorage[contract], 'ace/mode/solidity');
+                    if(this.sessions[file] == undefined) {
+                        this.sessions[file] = ace.createEditSession(localStorage[file], 'ace/mode/solidity');
+                        this.sessions[file].on('change', function() {
+                            GlobalEvent.$emit('fileChanged', file);
+                        });
                     }
-                    this.fileName = contract;
-                    localStorage.setItem('openFile', contract);
-                    this.editor.setSession(this.sessions[contract]);
+                    this.fileName = file;
+                    localStorage.setItem('openFile', file);
+                    this.editor.setSession(this.sessions[file]);
                     this.editor.setReadOnly(false);
                     this.editor.focus();
                 }
