@@ -28,32 +28,31 @@
         },
         methods: {
             compile: function(callback) {
-                this.save();
+                this.saveAll();
                 GlobalEvent.$emit('clearMessages');
                 GlobalEvent.$emit('processing', true);
 
                 const data = {};
-                data[this.fileName] = this.editor.getValue();
+                for (let i = 0; i < localStorage.length; i++){
+                    const key = localStorage.key(i);
+                    if(key.endsWith('.sol')) {
+                        data[key] = localStorage.getItem(key);
+                    }
+                }
 
                 window.axios.post('http://localhost:8081/compile', data)
                 .then(function(response) {
+                    var hasErrors = false;
                     this.clearMarkers();
                     this.editor.getSession().clearAnnotations();
-                    if(response.data.contracts != undefined) {
-                        for(let key in response.data.contracts) {
-                            GlobalEvent.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
-                            if(callback != undefined) {
-                                callback(response.data.contracts[key]);
-                            }
-                        }
-                    } else if(response.data.errors == undefined) {
-                        for(let key in response.data.sources) {
-                            GlobalEvent.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
-                        }
-                    }
                     if(response.data.errors != undefined) {
+                        hasErrors = this.checkHasErrors(response.data.errors);
                         GlobalEvent.$emit('messages', response.data.errors);
                         this.editor.getSession().setAnnotations(this.buildAnnotations(response.data.errors));
+                    }
+
+                    if(!hasErrors) {
+                        GlobalEvent.$emit('message', {severity: 'success', formattedMessage: "Compilation successful."});
                     }
                     if(callback == undefined || response.data.contracts == undefined) {
                         GlobalEvent.$emit('processing', false);
@@ -119,9 +118,23 @@
                     type: "constructor"
                 });
             },
+            checkHasErrors: function(errors) {
+                for(let key in errors) {
+                    if(errors[key].severity == 'error') {
+                        return true;
+                    }
+                }
+                return false;
+            },
             save: function() {
                 localStorage[this.fileName] = this.editor.getValue();
                 GlobalEvent.$emit('fileSaved', this.fileName);
+            },
+            saveAll: function() {
+                for(let key in this.sessions) {
+                    localStorage[key] = this.sessions[key].getValue();
+                    GlobalEvent.$emit('fileSaved', key);
+                }
             },
             load: function(file) {
                 if(localStorage[file] != undefined) {

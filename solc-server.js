@@ -32,6 +32,8 @@ app.post('/compile', function (req, res) {
         }
     }
 
+    // TODO handle imports
+
     const output = solc.compile(JSON.stringify(input))
     res.end(output)
 })
