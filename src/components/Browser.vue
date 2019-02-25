@@ -14,23 +14,7 @@
                 </b-input-group-append>
             </b-input-group>
         </div>
-        <div class="scrollable">
-            <b-list-group>
-                <b-list-group-item
-                v-for="file in files" v-bind:key="file.name"
-                class="p-1 px-2 d-flex" v-bind:class="selected == file ? 'active' : ''"
-                :title="file.name"
-                v-on:click="select(file)">
-                <span class="text-nowrap text-truncate w-100">
-                    <span class="ace_gutter-cell ace_error" v-if="file.state == 2"></span>
-                    <span class="ace_gutter-cell ace_warning" v-if="file.state == 1"></span>
-                    <span v-if="!file.saved">*&nbsp;</span>
-                    {{ file.name }}
-                </span>
-                <button type="button" aria-label="Close" class="close" @click="clickDelete(file, $event)">×</button>
-            </b-list-group-item>
-        </b-list-group>
-        </div>
+        <file-tree v-bind:files="files" v-on:select="select" v-on:delete="onDelete" ref="tree"/>
         <b-modal
             ref="confirmModal"
             title="Are you sure?"
@@ -51,10 +35,14 @@
 </template>
 
 <script>
+    import FileTree from '../components/FileTree.vue';
     const forbiddenCharacters = '/\\<>:"\'|?*'.split('');
 
     export default {
         name: "browser",
+        components: {
+            "file-tree": FileTree,
+        },
         data: function() {
             return {
                 selected: null,
@@ -95,13 +83,11 @@
                 this.newFile = '';
 
                 this.select(obj);
+                this.$refs.tree.select(obj);
             },
-            clickDelete: function(file, event) {
+            onDelete: function(file) {
                 this.deletingFile = file;
                 this.$refs.confirmModal.show();
-
-                if(event != undefined)
-                    event.stopPropagation();
             },
             cancelDelete: function() {
                 this.deletingFile = null;
@@ -122,23 +108,9 @@
                 GlobalEvent.$emit('fileSelected', this.selected.name);
             },
             selectIndex: function(index) {
-                this.select(this.files[index]);
-            },
-            handleNextFile: function() {
-                const index = this.files.indexOf(this.selected);
-                if(index == this.files.length - 1) {
-                    this.selectIndex(0);
-                } else {
-                    this.selectIndex(index + 1);
-                }
-            },
-            handlePreviousFile: function() {
-                const index = this.files.indexOf(this.selected);
-                if(index == 0) {
-                    this.selectIndex(this.files.length - 1);
-                } else {
-                    this.selectIndex(index - 1);
-                }
+                const file = this.files[index];
+                this.$refs.tree.select(file);
+                this.select(file);
             },
             handleFileChanged: function(fileName) {
                 this.setFileSaved(fileName, false);
@@ -191,8 +163,6 @@
             }
         },
         mounted() {
-            GlobalEvent.$on('nextFile', this.handleNextFile);
-            GlobalEvent.$on('previousFile', this.handlePreviousFile);
             GlobalEvent.$on('fileChanged', this.handleFileChanged);
             GlobalEvent.$on('fileSaved', this.handleFileSaved);
             GlobalEvent.$on('messages', this.handleFileState);
@@ -204,8 +174,6 @@
             }
         },
         beforeDestroy() {
-            GlobalEvent.$off('nextFile', this.handleNextFile);
-            GlobalEvent.$off('previousFile', this.handlePreviousFile);
             GlobalEvent.$off('fileChanged', this.handleFileChanged);
             GlobalEvent.$off('fileSaved', this.handleFileSaved);
             GlobalEvent.$off('messages', this.handleFileState);
