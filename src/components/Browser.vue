@@ -14,7 +14,7 @@
                 </b-input-group-append>
             </b-input-group>
         </div>
-        <file-tree v-bind:files="files" v-on:select="select" v-on:delete="onDelete" ref="tree"/>
+        <file-tree v-bind:files="files" v-on:select="select" v-on:delete="onDelete" v-bind:selected="selected" ref="tree"/>
         <b-modal
             ref="confirmModal"
             title="Are you sure?"
@@ -36,7 +36,7 @@
 
 <script>
     import FileTree from '../components/FileTree.vue';
-    const forbiddenCharacters = '/\\<>:"\'|?*'.split('');
+    const forbiddenCharacters = '\\<>:"\'|?*'.split('');
 
     export default {
         name: "browser",
@@ -83,7 +83,6 @@
                 this.newFile = '';
 
                 this.select(obj);
-                this.$refs.tree.select(obj);
             },
             onDelete: function(file) {
                 this.deletingFile = file;
@@ -109,7 +108,6 @@
             },
             selectIndex: function(index) {
                 const file = this.files[index];
-                this.$refs.tree.select(file);
                 this.select(file);
             },
             handleFileChanged: function(fileName) {
@@ -151,7 +149,10 @@
                 return null;
             },
             setFileSaved: function(fileName, saved) {
-                this.findFile(fileName).saved = saved;
+                const file = this.findFile(fileName);
+                if(file.saved != saved) {
+                    file.saved = saved;
+                }
             },
             sort: function(a, b) {
                 return a.name.localeCompare(b.name);

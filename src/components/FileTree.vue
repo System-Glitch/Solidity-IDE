@@ -1,26 +1,19 @@
 <template>
     <div class="scrollable">
-        <b-list-group>
-            <b-list-group-item
-            v-for="file in files" v-bind:key="file.name"
-            class="p-1 px-2 d-flex" v-bind:class="selected == file ? 'active' : ''"
-            :title="file.name"
-            v-on:click="select(file)">
-                <span class="text-nowrap text-truncate w-100">
-                    <span class="ace_gutter-cell ace_error" v-if="file.state == 2"></span>
-                    <span class="ace_gutter-cell ace_warning" v-if="file.state == 1"></span>
-                    <span v-if="!file.saved">*&nbsp;</span>
-                    {{ file.name }}
-                </span>
-                <button type="button" aria-label="Close" class="close" @click="clickDelete(file, $event)">×</button>
-            </b-list-group-item>
+        <b-list-group v-if="directoryTree">
+            <directory v-bind:directory="directoryTree" v-on:select="select" v-on:delete="onDelete" v-bind:selected="selected" ref="rootDirectory"/>
         </b-list-group>
     </div>
 </template>
 
 <script>
+    import Directory from '../components/Directory.vue';
+
     export default {
         name: "file-tree",
+        components: {
+            'directory': Directory
+        },
         props: {
             files: {
                 type: Array,
@@ -28,24 +21,71 @@
                 default: function() {
                     return [];
                 }
+            },
+            selected: {
+                type: Object,
+                required: false,
+                default: function() {
+                    return null;
+                }
             }
         },
         data: function() {
             return {
-                selected: null
+                directoryTree: null
+            }
+        },
+        watch: {
+            files: function() {
+                // TODO don't update the whole tree if only one file is created or deleted
+                this.updateDirectoryTree();
             }
         },
         methods: {
             select: function(file) {
-                this.selected = file;
-                this.$emit('select', this.selected);
+                this.$emit('select', file);
             },
-            clickDelete: function(file, event) {
+            onDelete: function(file) {
                 this.$emit('delete', file);
-
-                if(event != undefined)
-                    event.stopPropagation();
             },
+            updateDirectoryTree: function() {
+                this.directoryTree = {
+                    files: [],
+                    directories: {}
+                };
+
+                for(let key in this.files) {
+                    const file = this.files[key];
+                    const index = file.name.lastIndexOf('/');
+
+                    if(index != -1) {
+                        const path = file.name.substring(0, index);
+                        const directories = path.split('/');
+
+                        var currentDirectory = this.directoryTree;
+
+                        for(let i = 0 ; i < directories.length ; i++) {
+                            if(currentDirectory.directories[directories[i]] == undefined) {
+                                currentDirectory.directories[directories[i]] = {
+                                    files: [],
+                                    directories: {}
+                                };
+                            }
+                            currentDirectory = currentDirectory.directories[directories[i]];
+                        }
+                        currentDirectory.files.push(file);
+                    } else {
+                        this.directoryTree.files.push(file);
+                    }
+                }
+
+                this.directoryTree.files.sort();
+                setTimeout(() => {
+                    if(!this.$refs.rootDirectory.open) {
+                        this.$refs.rootDirectory.toggleOpen();
+                    }
+                }, 0);
+            }
         },
         mounted() {
 
