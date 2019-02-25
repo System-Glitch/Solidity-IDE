@@ -5,7 +5,7 @@
         </div>
         <div class="p-2 d-flex">
             <b-input-group class="w-auto flex-nowrap">
-                <b-form-input v-model="newFile" type="text" placeholder="New file..." size="sm" id="new-file" ref="create" @keyup.enter.native="create"/>
+                <b-form-input v-model.trim="newFile" type="text" placeholder="New file..." size="sm" id="new-file" ref="create" @keyup.enter.native="create"/>
                 <b-input-group-append>
                     <b-button variant="success" size="sm" class="flex-shrink-0" v-on:click="create" :disabled="!newFile.length">Create</b-button>
                 </b-input-group-append>
