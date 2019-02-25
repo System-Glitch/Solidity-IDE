@@ -38,6 +38,7 @@
         watch: {
             files: function() {
                 // TODO don't update the whole tree if only one file is created or deleted
+                // TODO file tree is refreshed a lot, see if possible optimization
                 this.updateDirectoryTree();
             }
         },

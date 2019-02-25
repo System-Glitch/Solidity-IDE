@@ -10,7 +10,7 @@
             <b-input-group class="w-auto flex-nowrap">
                 <b-form-input v-model.trim="newFile" type="text" placeholder="New file..." size="sm" id="new-file" ref="create" @keyup.enter.native="create" @keydown="onInput"/>
                 <b-input-group-append>
-                    <b-button variant="success" size="sm" class="flex-shrink-0" v-on:click="create" :disabled="!newFile.length">Create</b-button>
+                    <b-button variant="success" size="sm" class="flex-shrink-0" v-on:click="create" :disabled="!newFile.length || findFile(newFile) != null">Create</b-button>
                 </b-input-group-append>
             </b-input-group>
         </div>
@@ -70,6 +70,8 @@
                 }
             },
             create: function() {
+
+                if(!this.newFile.length || this.findFile(this.newFile) != null) return;
                 var name = this.newFile;
 
                 if(!name.endsWith('.sol'))
@@ -141,6 +143,10 @@
                 }
             },
             findFile: function(fileName) {
+
+                if(!fileName.endsWith('.sol'))
+                    fileName += '.sol';
+
                 for(let key in this.files) {
                     if(this.files[key].name == fileName) {
                         return this.files[key];

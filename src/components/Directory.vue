@@ -56,7 +56,6 @@
                 }, 0);
             },
             selected: function() {
-                this.updateSelectedOpen();
                 setTimeout(() => {
                     this.updateSelectedIndicator();
                 }, 0);
