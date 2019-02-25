@@ -2,6 +2,9 @@
     <div class="d-flex flex-column bg-dark">
         <div class="p-2 d-flex flex-horizontal justify-content-between align-items-center flex-shrink-0">
             <h5 class="m-0 d-inline-block">Browser</h5>
+            <div>
+                <button class="btn btn-success btn-sm" @click="updateFileList">Refresh</button>
+            </div>
         </div>
         <div class="p-2 d-flex">
             <b-input-group class="w-auto flex-nowrap">
