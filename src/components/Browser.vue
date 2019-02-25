@@ -116,6 +116,7 @@
                 this.setFileSaved(fileName, false);
             },
             handleFileSaved: function(fileName) {
+                this.resetStates();
                 this.setFileSaved(fileName, true);
             },
             handleFileState: function(messages) {
