@@ -5,7 +5,7 @@
         </div>
         <div class="p-2 d-flex">
             <b-input-group class="w-auto flex-nowrap">
-                <b-form-input v-model.trim="newFile" type="text" placeholder="New file..." size="sm" id="new-file" ref="create" @keyup.enter.native="create"/>
+                <b-form-input v-model.trim="newFile" type="text" placeholder="New file..." size="sm" id="new-file" ref="create" @keyup.enter.native="create" @keydown="onInput"/>
                 <b-input-group-append>
                     <b-button variant="success" size="sm" class="flex-shrink-0" v-on:click="create" :disabled="!newFile.length">Create</b-button>
                 </b-input-group-append>
@@ -48,6 +48,7 @@
 </template>
 
 <script>
+    const forbiddenCharacters = '/\\<>:"\'|?*'.split('');
 
     export default {
         name: "browser",
@@ -178,6 +179,12 @@
             },
             sort: function(a, b) {
                 return a.name.localeCompare(b.name);
+            },
+            onInput: function(e) {
+                if(forbiddenCharacters.indexOf(e.key) != -1) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
             }
         },
         mounted() {
