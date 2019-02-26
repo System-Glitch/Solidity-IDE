@@ -56,7 +56,8 @@
                 this.directoryTree.files.sort();
                 setTimeout(() => {
                     if(!this.$refs.rootDirectory.open) {
-                        this.$refs.rootDirectory.toggleOpen();
+                        this.$refs.rootDirectory.open = true;
+                        this.$refs.rootDirectory.updateSelectedIndicator();
                     }
                 }, 0);
             },

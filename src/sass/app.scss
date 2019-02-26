@@ -257,3 +257,7 @@ body, html {
 .icon.file {
     background-image: url('~@/assets/icons/file.png');
 }
+
+.modal-body {
+    word-wrap: break-word;
+}

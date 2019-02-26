@@ -87,9 +87,7 @@
                 if(this.directory.files.indexOf(this.selected) == -1) {
                     this.open = !this.open;
                     if(this.open) {
-                        setTimeout(() => {
-                            this.updateSelectedIndicator();
-                        }, 0);
+                        this.updateSelectedIndicator();
                     }
                 }
             },

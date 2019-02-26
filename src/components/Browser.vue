@@ -8,7 +8,7 @@
         </div>
         <div class="p-2 d-flex">
             <b-input-group class="w-auto flex-nowrap">
-                <b-form-input v-model.trim="newFile" type="text" placeholder="New file..." size="sm" id="new-file" ref="create" @keyup.enter.native="create" @keydown="onInput"/>
+                <b-form-input v-model.trim="newFile" type="text" placeholder="New file..." size="sm" id="new-file" maxlength="255" ref="create" @keyup.enter.native="create" @keydown="onInput"/>
                 <b-input-group-append>
                     <b-button variant="success" size="sm" class="flex-shrink-0" v-on:click="create" :disabled="!validateNewFile()">Create</b-button>
                 </b-input-group-append>
@@ -175,7 +175,8 @@
                 }
             },
             validateNewFile: function() {
-                return this.newFile.length &&
+                return this.newFile.length > 0 &&
+                    this.newFile.length <= 255 &&
                     !this.newFile.endsWith('.') &&
                     !this.newFile.endsWith('/') &&
                     this.findFile(this.newFile) == null
