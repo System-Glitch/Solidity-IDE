@@ -1,6 +1,6 @@
 <template>
     <b-list-group-item :title="name" class="d-flex flex-column">
-        <span v-on:click="toggleOpen" class="pl-0 py-1 pr-2" v-if="name != ''">
+        <span v-on:click="toggleOpen" class="pl-0 py-1 pr-2 text-nowrap" v-if="name != ''">
             <span class="icon" :class="open ? 'directory-open' : 'directory'"></span>
             {{ name }}
         </span>
@@ -11,7 +11,7 @@
             class="pl-0 py-1 pr-2 d-flex file" v-bind:class="selected == file ? 'active' : ''"
             :title="lastSegment(file.name)"
             v-on:click="select(file)">
-                <span class="text-nowrap text-truncate w-100">
+                <span class="text-nowrap text-truncate pr-1">
                     <span class="ace_gutter-cell ace_error" v-if="file.state == 2"></span>
                     <span class="ace_gutter-cell ace_warning" v-if="file.state == 1"></span>
                     <span class="icon file" v-if="file.state == 0"></span>

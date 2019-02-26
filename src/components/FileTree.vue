@@ -1,5 +1,5 @@
 <template>
-    <div class="scrollable">
+    <div class="scrollable d-flex">
         <b-list-group v-if="directoryTree">
             <directory v-bind:directory="directoryTree" v-on:select="select" v-on:delete="onDelete" v-bind:selected="selected" ref="rootDirectory"/>
         </b-list-group>
