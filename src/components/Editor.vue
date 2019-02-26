@@ -275,6 +275,13 @@
                         }
                     }
                 }
+            },
+            handleBrowserRefresh: function() {
+                for(let key in this.sessions) {
+                    if(!localStorage.hasOwnProperty(key)) {
+                        delete this.sessions[key];
+                    }
+                }
             }
         },
         mounted() {
@@ -305,6 +312,7 @@
             GlobalEvent.$on('fontSize', this.handleFontSize);
             GlobalEvent.$on('fileSelected', this.load);
             GlobalEvent.$on('fileDeleted', this.handleFileDelete);
+            GlobalEvent.$on('browserRefresh', this.handleBrowserRefresh);
 
             if(localStorage['openFile']) {
                 this.load(localStorage['openFile']);
@@ -317,6 +325,7 @@
             GlobalEvent.$off('fontSize', this.handleFontSize);
             GlobalEvent.$off('fileSelected', this.load);
             GlobalEvent.$off('fileDeleted', this.handleFileDelete);
+            GlobalEvent.$off('browserRefresh', this.handleBrowserRefresh);
             this.editor.destroy();
         }
     }

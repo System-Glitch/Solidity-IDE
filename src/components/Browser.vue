@@ -66,6 +66,7 @@
                 setTimeout(() => {
                     this.$refs.tree.updateDirectoryTree();
                 }, 0);
+                GlobalEvent.$emit('browserRefresh');
             },
             updateSelection: function() {
                 const file = this.selected != null ? this.findFile(this.selected.name) : null;
