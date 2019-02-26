@@ -170,12 +170,10 @@ body, html {
 
 .selected-indicator {
     display: block;
-    position: absolute;
+    position: fixed;
     opacity: 0;
-    top: 0;
     left: 0;
     width: 3px;
-    height: 100%;
     background-color: var(--info);
 }
 
