@@ -160,21 +160,31 @@ body, html {
     background-color: var(--dark);
 }
 
-.bg-dark .list-group-item .close {
+.list-group-item .close {
     color: #fff;
+    z-index: 1;
 }
 
-.bg-dark .list-group-item.active > span {
+.list-group-item.active > span {
+    color: #fff;
+    z-index: 1;
+}
+
+.list-group-item:hover > * {
+    cursor: pointer;
     color: #fff;
 }
 
 .selected-indicator {
     display: block;
-    position: fixed;
+    position: absolute;
     opacity: 0;
     left: 0;
-    width: 3px;
-    background-color: var(--info);
+    top: 0;
+    right: 0;
+    height: 100%;
+    background-color: #3e444a;
+    border-left: 3px solid var(--info);
 }
 
 .list-group-item.active .selected-indicator {
@@ -190,11 +200,6 @@ body, html {
 
 .list-group-item > .list-group {
     padding-left: 0.5rem;
-}
-
-.list-group-item:hover > * {
-    cursor: pointer;
-    color: #fff;
 }
 
 .list-group-item > .close {
@@ -261,5 +266,5 @@ body, html {
 }
 
 .file {
-    min-width: 173px;
+    min-width: 100px;
 }

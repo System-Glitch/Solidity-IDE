@@ -99,13 +99,13 @@
                     const elements = this.$refs[this.directory.files[0].name + '_select'];
                     if(elements != undefined && elements[0] != undefined) {
                         const element = elements[0];
-                        const height = element.parentElement.clientHeight;
+                        element.style.left = '';
+                        const position = this.calculatePosition(element);
 
                         for(let i = 0 ; i < this.directory.files.length ; i++) {
                             const element = this.$refs[this.directory.files[i].name + '_select'][0];
-                            if(element.style.height == '') {
-                                element.style.height = height + 'px';
-                                element.style.transform = 'translateY(' + (-height) + 'px)';
+                            if(element.style.left == '') {
+                                element.style.left = position;
                             }
                         }
                     }
@@ -126,6 +126,10 @@
                     this.open = true;
                     return true;
                 }
+            },
+            calculatePosition: function(element) {
+                const left = element.getBoundingClientRect().left;
+                return (-left) + 'px';
             }
         }
     }
