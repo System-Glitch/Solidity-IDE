@@ -68,8 +68,11 @@
                 }, 0);
             },
             updateSelection: function() {
-                if(this.files.length > 0 && this.files.indexOf(this.selected) == -1) {
+                const file = this.selected != null ? this.findFile(this.selected.name) : null;
+                if(this.files.length > 0 && file == null) {
                     this.selectIndex(0);
+                } else {
+                    this.selected = file;
                 }
             },
             create: function() {
