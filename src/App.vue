@@ -72,4 +72,12 @@
 #contracts {
     min-height: 200px;
 }
+
+#browser {
+    min-width: 200px;
+}
+
+#sidebar {
+    min-width: 300px;
+}
 </style>
