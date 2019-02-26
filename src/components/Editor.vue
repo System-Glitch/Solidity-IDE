@@ -55,6 +55,8 @@
 
                     if(callback == undefined || response.data.contracts == undefined) {
                         GlobalEvent.$emit('processing', false);
+                    } else {
+                        callback(response.data.contracts);
                     }
                 }.bind(this))
                 .catch(function( error ) {
@@ -85,20 +87,24 @@
                     GlobalEvent.$emit('processing', false);
                 });
             },
+            deployFile: function(file) {
+                for(let key in file) {
+                    this.deploy(key, file[key]);
+                }
+            },
             compileAndDeploy: function() {
-                this.compile(function(contracts) {
+                this.compile(function(files) {
                     if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
                         GlobalEvent.$emit('refreshAccounts', window.accountManager.selectedAccount, () => {
-                            for(let key in contracts) {
-                                this.deploy(key, contracts[key]);
+                            for(let key in files) {
+                                this.deployFile(files[key]);
                             }
                         });
                     } else {
-                        for(let key in contracts) {
-                            this.deploy(key, contracts[key]);
+                        for(let key in files) {
+                            this.deployFile(files[key]);
                         }
                     }
-
                 }.bind(this));
             },
             clear: function() {
@@ -258,6 +264,7 @@
                     if(file == this.fileName) {
                         this.editor.setSession(this.defaultSession);
                         this.editor.setReadOnly(true);
+                        this.updateAnnotations();
                     }
                     delete this.sessions[file];
                 }
