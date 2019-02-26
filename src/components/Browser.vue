@@ -10,7 +10,7 @@
             <b-input-group class="w-auto flex-nowrap">
                 <b-form-input v-model.trim="newFile" type="text" placeholder="New file..." size="sm" id="new-file" ref="create" @keyup.enter.native="create" @keydown="onInput"/>
                 <b-input-group-append>
-                    <b-button variant="success" size="sm" class="flex-shrink-0" v-on:click="create" :disabled="!newFile.length || findFile(newFile) != null">Create</b-button>
+                    <b-button variant="success" size="sm" class="flex-shrink-0" v-on:click="create" :disabled="!validateNewFile()">Create</b-button>
                 </b-input-group-append>
             </b-input-group>
         </div>
@@ -36,7 +36,7 @@
 
 <script>
     import FileTree from '../components/FileTree.vue';
-    const forbiddenCharacters = '\\<>:"\'|?*'.split('');
+    const forbiddenCharacters = '\\<>:"\'|?*~#\n\t\v\f\r'.split('');
 
     export default {
         name: "browser",
@@ -71,7 +71,7 @@
             },
             create: function() {
 
-                if(!this.newFile.length || this.findFile(this.newFile) != null) return;
+                if(!this.validateNewFile()) return;
                 var name = this.newFile;
 
                 if(!name.endsWith('.sol'))
@@ -168,6 +168,12 @@
                     e.preventDefault();
                     e.stopPropagation();
                 }
+            },
+            validateNewFile: function(e) {
+                return this.newFile.length &&
+                    !this.newFile.endsWith('.') &&
+                    !this.newFile.endsWith('/') &&
+                    this.findFile(this.newFile) == null
             }
         },
         mounted() {
