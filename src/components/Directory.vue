@@ -1,6 +1,9 @@
 <template>
     <b-list-group-item :title="name" class="d-flex flex-column">
-        <span v-on:click="toggleOpen" class="pl-0 py-1 pr-2">{{ name }}</span>
+        <span v-on:click="toggleOpen" class="pl-0 py-1 pr-2" v-if="name != ''">
+            <span class="icon" :class="open ? 'directory-open' : 'directory'"></span>
+            {{ name }}
+        </span>
         <b-list-group v-if="open">
             <directory v-for="(subdirectory, name) in directory.directories" v-bind:key="name" v-bind:directory="subdirectory" v-bind:name="name" v-on:select="select" v-on:delete="onDelete"  v-bind:selected="selected" :ref="'directory_' + name"/>
             <b-list-group-item
@@ -11,6 +14,7 @@
                 <span class="text-nowrap text-truncate w-100">
                     <span class="ace_gutter-cell ace_error" v-if="file.state == 2"></span>
                     <span class="ace_gutter-cell ace_warning" v-if="file.state == 1"></span>
+                    <span class="icon file" v-if="file.state == 0"></span>
                     <span v-if="!file.saved">*&nbsp;</span>
                     {{ lastSegment(file.name) }}
                 </span>
@@ -95,7 +99,7 @@
             updateSelectedIndicator: function() {
                 if(this.directory.files.length > 0) {
                     const elements = this.$refs[this.directory.files[0].name + '_select'];
-                    if(elements != undefined) {
+                    if(elements != undefined && elements[0] != undefined) {
                         const element = elements[0];
                         element.style.left = '';
                         const position = this.calculatePosition(element);
