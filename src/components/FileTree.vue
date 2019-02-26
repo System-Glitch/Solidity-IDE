@@ -35,13 +35,6 @@
                 directoryTree: null
             }
         },
-        watch: {
-            files: function() {
-                // TODO don't update the whole tree if only one file is created or deleted
-                // TODO file tree is refreshed a lot, see if possible optimization
-                this.updateDirectoryTree();
-            }
-        },
         methods: {
             select: function(file) {
                 this.$emit('select', file);
@@ -57,27 +50,7 @@
 
                 for(let key in this.files) {
                     const file = this.files[key];
-                    const index = file.name.lastIndexOf('/');
-
-                    if(index != -1) {
-                        const path = file.name.substring(0, index);
-                        const directories = path.split('/');
-
-                        var currentDirectory = this.directoryTree;
-
-                        for(let i = 0 ; i < directories.length ; i++) {
-                            if(currentDirectory.directories[directories[i]] == undefined) {
-                                currentDirectory.directories[directories[i]] = {
-                                    files: [],
-                                    directories: {}
-                                };
-                            }
-                            currentDirectory = currentDirectory.directories[directories[i]];
-                        }
-                        currentDirectory.files.push(file);
-                    } else {
-                        this.directoryTree.files.push(file);
-                    }
+                    this.addFile(file);
                 }
 
                 this.directoryTree.files.sort();
@@ -86,13 +59,53 @@
                         this.$refs.rootDirectory.toggleOpen();
                     }
                 }, 0);
+            },
+            addFile: function(file) {
+                const index = file.name.lastIndexOf('/');
+
+                if(index != -1) {
+                    const path = file.name.substring(0, index);
+                    const directories = path.split('/');
+
+                    var currentDirectory = this.directoryTree;
+
+                    for(let i = 0 ; i < directories.length ; i++) {
+                        if(currentDirectory.directories[directories[i]] == undefined) {
+                            currentDirectory.directories[directories[i]] = {
+                                files: [],
+                                directories: {}
+                            };
+                        }
+                        currentDirectory = currentDirectory.directories[directories[i]];
+                    }
+                    currentDirectory.files.push(file);
+                } else {
+                    this.directoryTree.files.push(file);
+                }
+            },
+            removeFile: function(file) {
+                this.removeFileFromDirectory(file, this.directoryTree);
+            },
+            removeFileFromDirectory(file, directory) {
+                const fileIndex = directory.files.indexOf(file);
+
+                if(fileIndex != -1) {
+                    directory.files.splice(fileIndex, 1);
+                    return true;
+                } else {
+                    for(let key in directory.directories) {
+                        const subDirectory = directory.directories[key];
+                        if(this.removeFileFromDirectory(file, subDirectory)) {
+                            if(subDirectory.files.length == 0) {
+                                delete directory.directories[key];
+                            }
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
             }
-        },
-        mounted() {
-
-        },
-        beforeDestroy() {
-
         }
     }
 </script>

@@ -63,6 +63,9 @@
 
                 this.files.sort(this.sort);
                 this.updateSelection();
+                setTimeout(() => {
+                    this.$refs.tree.updateDirectoryTree();
+                }, 0);
             },
             updateSelection: function() {
                 if(this.files.length > 0 && this.files.indexOf(this.selected) == -1) {
@@ -81,6 +84,7 @@
                 const obj = {name: name, saved: true, state: 0};
                 this.files.push(obj);
                 this.files.sort(this.sort);
+                this.$refs.tree.addFile(obj);
 
                 this.newFile = '';
 
@@ -98,6 +102,7 @@
                 if(index != -1) {
                     this.files.splice(index, 1);
                     localStorage.removeItem(this.deletingFile.name);
+                    this.$refs.tree.removeFile(this.deletingFile);
                     GlobalEvent.$emit('fileDeleted', this.deletingFile.name);
                     this.deletingFile = null;
 
@@ -169,7 +174,7 @@
                     e.stopPropagation();
                 }
             },
-            validateNewFile: function(e) {
+            validateNewFile: function() {
                 return this.newFile.length &&
                     !this.newFile.endsWith('.') &&
                     !this.newFile.endsWith('/') &&

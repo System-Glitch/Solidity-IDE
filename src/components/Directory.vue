@@ -4,7 +4,7 @@
             <span class="icon" :class="open ? 'directory-open' : 'directory'"></span>
             {{ name }}
         </span>
-        <b-list-group v-if="open">
+        <b-list-group :class="open ? '' : 'd-none'">
             <directory v-for="(subdirectory, name) in directory.directories" v-bind:key="name" v-bind:directory="subdirectory" v-bind:name="name" v-on:select="select" v-on:delete="onDelete"  v-bind:selected="selected" :ref="'directory_' + name"/>
             <b-list-group-item
             v-for="file in directory.files" v-bind:key="file.name"
@@ -118,7 +118,7 @@
             updateSelectedOpen: function() {
                 for(let key in this.directory.directories) {
                     const directory = this.$refs['directory_' + key][0];
-                    if(directory.updateSelectedOpen()) {
+                    if(directory != undefined && directory.updateSelectedOpen()) {
                         this.open = true;
                         return true;
                     }
@@ -133,11 +133,6 @@
                 const left = element.getBoundingClientRect().left;
                 return (-left) + 'px';
             }
-        },
-        mounted() {
-        },
-        beforeDestroy() {
-
         }
     }
 </script>
