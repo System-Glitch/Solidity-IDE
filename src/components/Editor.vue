@@ -267,6 +267,13 @@
                         this.updateAnnotations();
                     }
                     delete this.sessions[file];
+
+                    for(let key in this.errors) {
+                        const message = this.errors[key];
+                        if(message.sourceLocation.file == file) {
+                            delete this.errors[key];
+                        }
+                    }
                 }
             }
         },
