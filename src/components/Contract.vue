@@ -58,11 +58,12 @@
                 const activeAccount = window.accountManager.getActiveAccount();
                 try {
                     const params = JSON.parse(data.params);
-                    if(params.length < data.method.inputs.length)
+                    if(params.length < data.method.inputs.length) {
                         throw {message:
                                 'Invalid number of parameters for "' + data.method.name +
                                 '". Got ' + params.length + ' expected ' + data.method.inputs.length + '!'
                             };
+                    }
 
                     if(data.method.stateMutability == 'view' || data.method.stateMutability == 'pure') {
                         method.apply(null, params).call({from: activeAccount.address})

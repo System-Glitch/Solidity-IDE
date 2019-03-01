@@ -5,18 +5,18 @@
             {{ name }}
         </span>
         <b-list-group :class="open ? '' : 'd-none'">
-            <directory v-for="(subdirectory, name) in directory.directories" v-bind:key="name" v-bind:directory="subdirectory" v-bind:name="name" v-on:select="select" v-on:delete="onDelete"  v-bind:selected="selected" :ref="'directory_' + name"/>
+            <directory v-for="subdirectory in directories" v-bind:key="subdirectory.path" v-bind:files="subdirectory.childs" v-bind:name="subdirectory.name" v-on:select="select" v-on:delete="onDelete"  v-bind:selected="selected" :ref="'directory_' + subdirectory.path"/>
             <b-list-group-item
-            v-for="file in directory.files" v-bind:key="file.name"
+            v-for="file in childFiles" v-bind:key="file.name"
             class="pl-0 py-1 pr-2 d-flex file" v-bind:class="selected == file ? 'active' : ''"
-            :title="lastSegment(file.name)"
+            :title="file.name"
             v-on:click="select(file)">
                 <span class="text-nowrap text-truncate pr-1">
                     <span class="ace_gutter-cell ace_error" v-if="file.state == 2"></span>
                     <span class="ace_gutter-cell ace_warning" v-if="file.state == 1"></span>
                     <span class="icon file" v-if="file.state == 0"></span>
                     <span v-if="!file.saved">*&nbsp;</span>
-                    {{ lastSegment(file.name) }}
+                    {{ file.name }}
                 </span>
                 <button type="button" aria-label="Close" class="close" @click="clickDelete(file, $event)">×</button>
                 <div class="selected-indicator" :ref="file.name + '_select'"></div>
@@ -29,8 +29,8 @@
     export default {
         name: "directory",
         props: {
-            directory: {
-                type: Object,
+            files: {
+                type: Array,
                 required: true
             },
             name: {
@@ -54,20 +54,22 @@
             }
         },
         watch: {
-            directory: function() {
-                setTimeout(() => {
-                    this.updateSelectedIndicator();
-                }, 0);
-            },
             selected: function() {
                 setTimeout(() => {
-                    this.updateSelectedIndicator();
+                    this.updateSelectedOpen();
                 }, 0);
+            }
+        },
+        computed: {
+            childFiles: function () {
+                return this.files.filter(function (file) {
+                    return !file.directory;
+                })
             },
-            open: function() {
-                setTimeout(() => {
-                    this.updateSelectedIndicator();
-                }, 0);
+            directories: function () {
+                return this.files.filter(function (file) {
+                    return file.directory;
+                })
             }
         },
         methods: {
@@ -84,48 +86,47 @@
                     event.stopPropagation();
             },
             toggleOpen: function() {
-                if(this.directory.files.indexOf(this.selected) == -1) {
+                if(this.files.indexOf(this.selected) == -1) {
                     this.open = !this.open;
                     if(this.open) {
                         this.updateSelectedIndicator();
                     }
                 }
             },
-            lastSegment: function(path) {
-                return path.substring(path.lastIndexOf('/') + 1);
-            },
             updateSelectedIndicator: function() {
-                if(this.directory.files.length > 0) {
-                    const elements = this.$refs[this.directory.files[0].name + '_select'];
+                if(this.childFiles.length > 0) {
+                    const elements = this.$refs[this.childFiles[0].name + '_select'];
                     if(elements != undefined && elements[0] != undefined) {
                         const element = elements[0];
                         element.style.left = '';
                         const position = this.calculatePosition(element);
 
-                        for(let i = 0 ; i < this.directory.files.length ; i++) {
-                            const element = this.$refs[this.directory.files[i].name + '_select'][0];
+                        for(let i = 0 ; i < this.childFiles.length ; i++) {
+                            const element = this.$refs[this.childFiles[i].name + '_select'][0];
                             if(element.style.left == '') {
                                 element.style.left = position;
                             }
                         }
                     }
                 }
-
-                this.updateSelectedOpen();
             },
             updateSelectedOpen: function() {
-                for(let key in this.directory.directories) {
-                    const directory = this.$refs['directory_' + key][0];
+                for(let key in this.directories) {
+                    const directory = this.$refs['directory_' + this.directories[key].path][0];
                     if(directory != undefined && directory.updateSelectedOpen()) {
                         this.open = true;
+                        setTimeout(() => { this.updateSelectedIndicator() }, 0);
                         return true;
                     }
                 }
 
-                if(this.directory.files.indexOf(this.selected) != -1) {
+                if(this.files.indexOf(this.selected) != -1) {
                     this.open = true;
+                    setTimeout(() => { this.updateSelectedIndicator() }, 0);
                     return true;
                 }
+
+                return false;
             },
             calculatePosition: function(element) {
                 const left = element.getBoundingClientRect().left;

@@ -14,7 +14,11 @@
                 </b-input-group-append>
             </b-input-group>
         </div>
-        <file-tree v-bind:files="files" v-on:select="select" v-on:delete="onDelete" v-bind:selected="selected" ref="tree"/>
+        <div class="scrollable d-flex">
+            <b-list-group v-if="files" class="w-100">
+                <directory v-bind:files="files" v-on:select="select" v-on:delete="onDelete" v-bind:selected="selected" ref="rootDirectory"/>
+            </b-list-group>
+        </div>
         <b-modal
             ref="confirmModal"
             title="Are you sure?"
@@ -35,13 +39,13 @@
 </template>
 
 <script>
-    import FileTree from '../components/FileTree.vue';
+    import Directory from '../components/Directory.vue';
     const forbiddenCharacters = '\\<>:"\'|?*~#\n\t\v\f\r'.split('');
 
     export default {
         name: "browser",
         components: {
-            "file-tree": FileTree,
+            "directory": Directory,
         },
         data: function() {
             return {
@@ -53,28 +57,29 @@
         },
         methods: {
             updateFileList: function() {
-                this.files = [];
-                for (let i = 0; i < localStorage.length; i++){
-                    const key = localStorage.key(i);
-                    if(key.endsWith('.sol')) {
-                        this.files.push({name: key, saved: true, state: 0});
-                    }
-                }
 
-                this.files.sort(this.sort);
-                this.updateSelection();
-                setTimeout(() => {
-                    this.$refs.tree.updateDirectoryTree();
-                }, 0);
-                GlobalEvent.$emit('browserRefresh');
+                window.axios.get('http://localhost:8081/directory') // TODO don't load the whole tree at once
+                .then(function(response) {
+                    this.files = [];
+                    for(let key in response.data) {
+                        const file = response.data[key];
+                        this.files.push(file);
+                    }
+
+                    this.files.sort(this.sort);
+                    this.updateSelection();
+                    this.$refs.rootDirectory.open = true;
+                    this.$refs.rootDirectory.updateSelectedOpen();
+                    GlobalEvent.$emit('browserRefresh');
+                }.bind(this))
+                .catch(function( error ) {
+                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch directory content: " + error.message });
+                });
             },
             updateSelection: function() {
-                const file = this.selected != null ? this.findFile(this.selected.name) : null;
-                if(this.files.length > 0 && file == null) {
-                    this.selectIndex(0);
-                } else {
+                const file = this.selected != null ? this.findFile(this.files, this.selected.path) : null;
+                if(this.selected != file)
                     this.selected = file;
-                }
             },
             create: function() {
 
@@ -85,7 +90,7 @@
                     name += '.sol';
 
                 localStorage.setItem(name, '');
-                const obj = {name: name, saved: true, state: 0};
+                const obj = {name: name, directory: false, saved: true, state: 0};
                 this.files.push(obj);
                 this.files.sort(this.sort);
                 this.$refs.tree.addFile(obj);
@@ -101,7 +106,7 @@
             cancelDelete: function() {
                 this.deletingFile = null;
             },
-            deleteFile: function() {
+            deleteFile: function() { // TODO delete file
                 const index = this.files.indexOf(this.deletingFile);
                 if(index != -1) {
                     this.files.splice(index, 1);
@@ -115,33 +120,38 @@
             },
             select: function(file) {
                 this.selected = file;
-                GlobalEvent.$emit('fileSelected', this.selected.name);
-            },
-            selectIndex: function(index) {
-                const file = this.files[index];
-                this.select(file);
+                GlobalEvent.$emit('fileSelected', this.selected ? this.selected.path : null);
             },
             handleFileChanged: function(fileName) {
                 this.setFileSaved(fileName, false);
             },
             handleFileSaved: function(fileName) {
-                this.resetStates();
+                this.resetStates(this.files);
                 this.setFileSaved(fileName, true);
             },
             handleFileState: function(messages) {
-                this.resetStates();
+                this.resetStates(this.files);
                 for(let key in messages) {
                     const message = messages[key];
-                    const file = this.findFile(message.sourceLocation.file);
+                    const file = this.findFile(this.files, message.sourceLocation.file);
                     if(file != null) {
                         const newState = this.getStateFromSeverity(message.severity);
                         file.state = file.state < newState ? newState : file.state;
                     }
                 }
             },
-            resetStates: function() {
-                for(let key in this.files) {
-                    this.files[key].state = 0;
+            handleBrowserRefresh: function() {
+                if(localStorage['openFile']) {
+                    this.select(this.findFile(this.files, localStorage['openFile']));
+                }
+            },
+            resetStates: function(dir) {
+                for(let key in dir) { // TODO not working anymore
+                    dir[key].state = 0;
+
+                    if(dir[key].directory) {
+                        this.resetStates(dir[key].childs);
+                    }
                 }
             },
             getStateFromSeverity: function(severity) {
@@ -151,20 +161,29 @@
                     default: return 0;
                 }
             },
-            findFile: function(fileName) {
+            findFile: function(dir, fileName) {
 
                 if(!fileName.endsWith('.sol'))
                     fileName += '.sol';
 
-                for(let key in this.files) {
-                    if(this.files[key].name == fileName) {
-                        return this.files[key];
+                for(let key in dir) {
+                    if(!dir[key].directory && dir[key].path == fileName) {
+                        return dir[key];
                     }
                 }
+
+                for(let key in dir) {
+                    if(dir[key].directory && dir[key].childs.length) {
+                        const file = this.findFile(dir[key].childs, fileName);
+                        if(file != null)
+                            return file;
+                    }
+                }
+
                 return null;
             },
             setFileSaved: function(fileName, saved) {
-                const file = this.findFile(fileName);
+                const file = this.findFile(this.files, fileName);
                 if(file.saved != saved) {
                     file.saved = saved;
                 }
@@ -183,24 +202,22 @@
                     this.newFile.length <= 255 &&
                     !this.newFile.endsWith('.') &&
                     !this.newFile.endsWith('/') &&
-                    this.findFile(this.newFile) == null
+                    this.findFile(this.files, this.newFile) == null
             }
         },
         mounted() {
             GlobalEvent.$on('fileChanged', this.handleFileChanged);
             GlobalEvent.$on('fileSaved', this.handleFileSaved);
             GlobalEvent.$on('messages', this.handleFileState);
+            GlobalEvent.$on('browserRefresh', this.handleBrowserRefresh);
 
             this.updateFileList();
-
-            if(localStorage['openFile']) {
-                this.selected = this.findFile(localStorage['openFile']);
-            }
         },
         beforeDestroy() {
             GlobalEvent.$off('fileChanged', this.handleFileChanged);
             GlobalEvent.$off('fileSaved', this.handleFileSaved);
             GlobalEvent.$off('messages', this.handleFileState);
+            GlobalEvent.$off('browserRefresh', this.handleBrowserRefresh);
         }
     }
 </script>

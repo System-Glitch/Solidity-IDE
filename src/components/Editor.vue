@@ -156,26 +156,42 @@
                     GlobalEvent.$emit('fileSaved', key);
                 }
             },
-            load: function(file) {
-                var needUpdate = false;
-                if(localStorage[file] != undefined) {
+            load: function(file, force) {
+                if(file != null) {
+                    if(this.sessions[file] == undefined || force) {
+                        window.axios.get('http://localhost:8081/file', {
+                            params: {
+                                file: file
+                            }
+                        })
+                        .then(function(response) {
+                            this.sessions[file] = ace.createEditSession(response.data, 'ace/mode/solidity');
+                            this.sessions[file].on('change', function() {
+                                GlobalEvent.$emit('fileChanged', file);
+                            });
+                            this.fileName = file;
+                            localStorage.setItem('openFile', file);
+                            this.editor.setSession(this.sessions[file]);
+                            this.editor.setReadOnly(false);
+                            this.editor.focus();
 
-                    if(this.sessions[file] == undefined) {
-                        this.sessions[file] = ace.createEditSession(localStorage[file], 'ace/mode/solidity');
-                        this.sessions[file].on('change', function() {
-                            GlobalEvent.$emit('fileChanged', file);
+                            this.updateAnnotations();
+                        }.bind(this))
+                        .catch(function( error ) {
+                            GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: " + error.message });
                         });
-                        needUpdate = true;
+                    } else {
+                        this.fileName = file;
+                        localStorage.setItem('openFile', file);
+                        this.editor.setSession(this.sessions[file]);
+                        this.editor.setReadOnly(false);
+                        this.editor.focus();
                     }
-                    this.fileName = file;
-                    localStorage.setItem('openFile', file);
-                    this.editor.setSession(this.sessions[file]);
-                    this.editor.setReadOnly(false);
-                    this.editor.focus();
-
-                    if(needUpdate) {
-                        this.updateAnnotations();
-                    }
+                } else {
+                    this.fileName = null;
+                    this.editor.setSession(this.defaultSession);
+                    this.editor.setReadOnly(true);
+                    this.updateAnnotations();
                 }
             },
             buildAnnotations: function() {
@@ -278,9 +294,11 @@
             },
             handleBrowserRefresh: function() {
                 for(let key in this.sessions) {
-                    if(!localStorage.hasOwnProperty(key)) {
-                        delete this.sessions[key];
-                    }
+                    delete this.sessions[key];
+                }
+
+                if(this.fileName) {
+                    this.load(this.fileName, true);
                 }
             }
         },
@@ -313,10 +331,6 @@
             GlobalEvent.$on('fileSelected', this.load);
             GlobalEvent.$on('fileDeleted', this.handleFileDelete);
             GlobalEvent.$on('browserRefresh', this.handleBrowserRefresh);
-
-            if(localStorage['openFile']) {
-                this.load(localStorage['openFile']);
-            }
         },
         beforeDestroy() {
             GlobalEvent.$off('compile', this.compile);

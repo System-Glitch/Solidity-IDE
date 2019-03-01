@@ -1,8 +1,18 @@
-const PORT = 8081;
+var directory = process.argv[2] ? process.argv[2] : __dirname
+const PORT = 8081
+const fs = require('fs')
 const solc = require('solc')
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
+
+if(!directory.endsWith('/'))
+    directory += '/'
+
+if (!fs.existsSync(directory) || !fs.lstatSync(directory).isDirectory()) {
+    console.error('"' + directory + '" doesn\'t exist or is not a directory.')
+    process.exit(1)
+}
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
@@ -16,7 +26,7 @@ app.use(function(req, res, next) {
 app.post('/compile', function (req, res) {
 
     const sources = {};
-    for(let key in req.body) {
+    for(let key in req.body) { // TODO use directory variable instead
         sources[key] = {
             content: req.body[key]
         };
@@ -39,13 +49,78 @@ app.post('/compile', function (req, res) {
     res.end(output)
 })
 
+//------------------------------------
+// FILESYSTEM
+
+// TODO check permissions
+app.get('/directory', function(req, res) {
+    if(req.query.root) {
+        if (!fs.existsSync(req.query.root) || !fs.lstatSync(req.query.root).isDirectory()) {
+            res.status(400);
+            res.end('Given root directory doesn\'t exist or is not a directory.');
+            return;
+        }
+        directory = req.query.root;
+
+        if(!directory.endsWith('/'))
+            directory += '/'
+    }
+
+    const result = listDir('', [])
+    res.end(JSON.stringify(result))
+})
+
+// Fetch file
+app.get('/file', function(req, res) {
+    if(req.query.file) {
+        const file = directory + req.query.file;
+        if (!fs.existsSync(file) || !fs.lstatSync(file).isFile() || !file.endsWith('.sol')) {
+            res.status(400);
+            res.end('Given file doesn\'t exist or is not a solidity file.');
+            return;
+        }
+        res.end(fs.readFileSync(file).toString());
+    } else {
+        res.status(400);
+        res.end('File is required.');
+    }
+})
+
+function listDir(dir, result) {
+    const items = fs.readdirSync(directory + dir);
+
+    for(let key in items) {
+        const item = items[key]
+        const stats = fs.lstatSync(directory + dir + item)
+        if((stats.isFile() && !item.endsWith('.sol')) || (!stats.isFile() && !stats.isDirectory()))
+            continue; // Skip non-sol files and non-directories
+        const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true};
+        result.push(file);
+        if(stats.isDirectory()) {
+            file.childs = listDir(dir + item + '/', []);
+        }
+    }
+
+    return result;
+}
+
+// Create directory
+
+// TODO Delete file
+
+// TODO Create file
+
+// TODO Save file
+
+//------------------------------------
+
 app.get('/shutdown', function() {
     console.log('IDE closed, exiting.')
     process.exit(0)
 })
 
 app.listen(PORT, 'localhost', function () {
-    console.log('Started solc server. Listening on localhost:' + PORT)
+    console.log('Started solc server. Listening on localhost:' + PORT + ', directory "' + directory + '"')
 })
 
 setTimeout(function() {
