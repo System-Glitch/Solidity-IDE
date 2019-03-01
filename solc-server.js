@@ -1,3 +1,4 @@
+const PORT = 8081;
 const solc = require('solc')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -43,8 +44,8 @@ app.get('/shutdown', function() {
     process.exit(0)
 })
 
-app.listen(8081, function () {
-    console.log('Started solc server on port 8081.')
+app.listen(PORT, 'localhost', function () {
+    console.log('Started solc server. Listening on localhost:' + PORT)
 })
 
 setTimeout(function() {
