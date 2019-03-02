@@ -4,7 +4,7 @@
             <h5 class="m-0 d-inline-block">Browser</h5>
             <div>
                 <button class="btn btn-primary btn-sm mr-1" @click="$refs.browseModal.show()" title="Open..."><i class="icon directory"></i></button>
-                <button class="btn btn-primary btn-sm" @click="updateFileList" title="Refresh"><i class="icon refresh"></i></button>
+                <button class="btn btn-primary btn-sm" @click="updateFileList()" title="Refresh"><i class="icon refresh"></i></button>
             </div>
         </div>
         <div class="p-2 d-flex">

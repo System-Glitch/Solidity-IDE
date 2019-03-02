@@ -70,12 +70,9 @@ app.get('/directory', function(req, res) {
 app.get('/file', function(req, res) {
     if(req.query.file) {
         const file = directory + req.query.file
-        if (!fs.existsSync(file) || !fs.lstatSync(file).isFile() || !file.endsWith('.sol')) {
-            res.status(400)
-            res.end('Given file doesn\'t exist or is not a solidity file.')
-            return
+        if (validateFile(file, res)) {
+            res.end(fs.readFileSync(file).toString())
         }
-        res.end(fs.readFileSync(file).toString())
     } else {
         res.status(400)
         res.end('File is required.')
@@ -87,9 +84,7 @@ app.put('/save', function(req, res) {
     var file = ''
     if(req.body.file) {
         file = directory + req.body.file
-        if (!fs.existsSync(file) || !fs.lstatSync(file).isFile() || !file.endsWith('.sol')) {
-            res.status(400)
-            res.end('Given file doesn\'t exist or is not a solidity file.')
+        if (!validateFile(file, res)) {
             return
         }
     } else {
@@ -113,15 +108,12 @@ app.put('/save', function(req, res) {
 app.delete('/delete', function(req, res) {
     if(req.body.file) {
         const file = directory + req.body.file
-        if (!fs.existsSync(file) || !fs.lstatSync(file).isFile() || !file.endsWith('.sol')) {
-            res.status(400)
-            res.end('Given file doesn\'t exist or is not a solidity file.')
-            return
+        if (validateFile(file, res)) {
+            fs.unlinkSync(file)
+            res.status(204)
+            res.end()
         }
 
-        fs.unlinkSync(file)
-        res.status(204)
-        res.end()
     } else {
         res.status(400)
         res.end('File is required.')
@@ -164,6 +156,15 @@ function listDirForCompile(dir, result) {
     }
 
     return result;
+}
+
+function validateFile(path, res) {
+    if (!fs.existsSync(path) || !fs.lstatSync(path).isFile() || !path.endsWith('.sol')) {
+        res.status(400)
+        res.end('Given file doesn\'t exist or is not a solidity file.')
+        return false
+    }
+    return true
 }
 
 // Create directory
