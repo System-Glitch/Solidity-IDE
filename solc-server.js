@@ -18,6 +18,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*")
+    res.header("Access-Control-Allow-Methods", "OPTIONS, HEAD, GET, POST, PUT, DELETE")
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
     res.header("Content-Type", "application/json")
     next();
@@ -73,31 +74,58 @@ app.get('/directory', function(req, res) {
 // Fetch file
 app.get('/file', function(req, res) {
     if(req.query.file) {
-        const file = directory + req.query.file;
+        const file = directory + req.query.file
         if (!fs.existsSync(file) || !fs.lstatSync(file).isFile() || !file.endsWith('.sol')) {
-            res.status(400);
-            res.end('Given file doesn\'t exist or is not a solidity file.');
-            return;
+            res.status(400)
+            res.end('Given file doesn\'t exist or is not a solidity file.')
+            return
         }
-        res.end(fs.readFileSync(file).toString());
+        res.end(fs.readFileSync(file).toString())
     } else {
-        res.status(400);
-        res.end('File is required.');
+        res.status(400)
+        res.end('File is required.')
+    }
+})
+
+// Save file
+app.put('/save', function(req, res) {
+    var file = ''
+    if(req.body.file) {
+        file = directory + req.body.file
+        if (!fs.existsSync(file) || !fs.lstatSync(file).isFile() || !file.endsWith('.sol')) {
+            res.status(400)
+            res.end('Given file doesn\'t exist or is not a solidity file.')
+            return
+        }
+    } else {
+        res.status(400)
+        res.end('File is required.')
+        return
+    }
+
+    if(req.body.content) {
+        // TODO handle file permissions
+        fs.writeFileSync(file, req.body.content)
+        res.status(204)
+        res.end()
+    } else {
+        res.status(400)
+        res.end('Content is required.')
     }
 })
 
 function listDir(dir, result) {
-    const items = fs.readdirSync(directory + dir);
+    const items = fs.readdirSync(directory + dir)
 
     for(let key in items) {
         const item = items[key]
         const stats = fs.lstatSync(directory + dir + item)
         if((stats.isFile() && !item.endsWith('.sol')) || (!stats.isFile() && !stats.isDirectory()))
             continue; // Skip non-sol files and non-directories
-        const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true};
-        result.push(file);
+        const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true}
+        result.push(file)
         if(stats.isDirectory()) {
-            file.childs = listDir(dir + item + '/', []);
+            file.childs = listDir(dir + item + '/', [])
         }
     }
 
@@ -109,8 +137,6 @@ function listDir(dir, result) {
 // TODO Delete file
 
 // TODO Create file
-
-// TODO Save file
 
 //------------------------------------
 

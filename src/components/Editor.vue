@@ -146,15 +146,33 @@
                 }
                 return false;
             },
-            save: function() {
-                localStorage[this.fileName] = this.editor.getValue();
-                GlobalEvent.$emit('fileSaved', this.fileName);
+            save: function(file, content) {
+                window.axios.put('http://localhost:8081/save', {
+                    file: file,
+                    content: content
+                })
+                .then(function() {
+                    GlobalEvent.$emit('fileSaved', file);
+                }.bind(this))
+                .catch(function(error) {
+                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: " + error.message });
+                });
             },
             saveAll: function() {
+                const promises = [];
                 for(let key in this.sessions) {
-                    localStorage[key] = this.sessions[key].getValue();
-                    GlobalEvent.$emit('fileSaved', key);
+                    promises.push(window.axios.put('http://localhost:8081/save', {
+                        file: key,
+                        content: this.sessions[key].getValue()
+                    }))
                 }
+
+                window.axios.all(promises).then(function(results) {
+                    results.forEach(function(response) {
+                        const params = JSON.parse(response.config.data);
+                        GlobalEvent.$emit('fileSaved', params.file);
+                    })
+                });
             },
             load: function(file, force) {
                 if(file != null) {
