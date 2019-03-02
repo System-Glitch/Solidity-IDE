@@ -35,8 +35,7 @@ npm run serve
 
 ## TODO
 
-- Multiple files
-- Import from file system, save to file system
 - Dark-themed inputs
 - Config to select solc server host and ganache host
+- Optimize file browser by not loading the whole file tree at once
 - Your suggestions

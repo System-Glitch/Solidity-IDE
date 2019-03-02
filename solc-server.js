@@ -189,7 +189,7 @@ setTimeout(function() {
     require('ganache-cli/cli')
 }, 1);
 
-if(process.argv && process.argv[2] == 'ide') {
+if(process.argv && process.argv[2] == 'ide') { // TODO not working anymore with project directory parameter
     const url = 'file://' + __dirname + '/dist/index.html';
     const start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open');
     require('child_process').exec(start + ' ' + url);
