@@ -1,7 +1,7 @@
 <template>
     <b-list-group-item :title="name" class="d-flex flex-column">
         <span v-on:click="toggleOpen" class="pl-0 py-1 pr-2 text-nowrap" v-if="name != ''">
-            <span class="icon" :class="open ? 'directory-open' : 'directory'"></span>
+            <span class="icon icon-pad" :class="open ? 'directory-open' : 'directory'"></span>
             {{ name }}
         </span>
         <b-list-group :class="open ? '' : 'd-none'">
@@ -14,7 +14,7 @@
                 <span class="text-nowrap text-truncate pr-1">
                     <span class="ace_gutter-cell ace_error" v-if="file.state == 2"></span>
                     <span class="ace_gutter-cell ace_warning" v-if="file.state == 1"></span>
-                    <span class="icon file" v-if="file.state == 0"></span>
+                    <span class="icon icon-pad file" v-if="file.state == 0"></span>
                     <span v-if="!file.saved">*&nbsp;</span>
                     {{ file.name }}
                 </span>

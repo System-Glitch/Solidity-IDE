@@ -244,6 +244,12 @@ body, html {
 
 .icon {
     background-repeat: no-repeat;
+    padding-left: 16px;
+    padding-right: 0px;
+    background-position: center;
+}
+
+.icon.icon-pad {
     background-position: 2px center;
     padding-left: 19px;
     padding-right: 6px;
@@ -259,6 +265,10 @@ body, html {
 
 .icon.file {
     background-image: url('~@/assets/icons/file.png');
+}
+
+.icon.refresh {
+    background-image: url('~@/assets/icons/refresh.png');
 }
 
 .modal-body {
