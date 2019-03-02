@@ -169,8 +169,6 @@ function validateFile(path, res) {
 
 // Create directory
 
-// TODO Delete file
-
 // TODO Create file
 
 //------------------------------------
