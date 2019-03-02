@@ -109,6 +109,26 @@ app.put('/save', function(req, res) {
     }
 })
 
+// Delete file
+app.delete('/delete', function(req, res) {
+    if(req.body.file) {
+        const file = directory + req.body.file
+        if (!fs.existsSync(file) || !fs.lstatSync(file).isFile() || !file.endsWith('.sol')) {
+            res.status(400)
+            res.end('Given file doesn\'t exist or is not a solidity file.')
+            return
+        }
+
+        fs.unlinkSync(file)
+        res.status(204)
+        res.end()
+    } else {
+        res.status(400)
+        res.end('File is required.')
+        return
+    }
+})
+
 function listDir(dir, result) {
     const items = fs.readdirSync(directory + dir)
 

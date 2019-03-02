@@ -312,6 +312,8 @@
                     delete this.sessions[key];
                 }
 
+                this.errors = undefined;
+                this.clear();
                 if(this.fileName) {
                     this.load(this.fileName, true);
                 }

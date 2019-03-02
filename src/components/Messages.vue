@@ -69,12 +69,14 @@
             GlobalEvent.$on('message', this.addMessage);
             GlobalEvent.$on('clearMessages', this.clearMessages);
             GlobalEvent.$on('processing', this.setProcessing);
+            GlobalEvent.$on('browserRefresh', this.clearMessages);
         },
         beforeDestroy() {
             GlobalEvent.$off('messages', this.addMessages);
             GlobalEvent.$off('message', this.addMessage);
             GlobalEvent.$off('clearMessages', this.clearMessages);
             GlobalEvent.$off('processing', this.setProcessing);
+            GlobalEvent.$off('browserRefresh', this.clearMessages);
         }
     }
 </script>

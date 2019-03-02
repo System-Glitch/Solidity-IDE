@@ -76,8 +76,8 @@
             select: function(file) {
                 this.$emit('select', file);
             },
-            onDelete: function(file) {
-                this.$emit('delete', file);
+            onDelete: function(file, files) {
+                this.$emit('delete', file, files ? files : this.files);
             },
             clickDelete: function(file, event) {
                 this.onDelete(file);

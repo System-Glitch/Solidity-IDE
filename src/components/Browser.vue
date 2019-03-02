@@ -32,7 +32,7 @@
             footer-bg-variant="dark" footer-text-variant="light"
             ok-variant="danger" cancel-variant="primary"
         >
-            <p>Are you sure you want to delete <strong class="monospace text-warning" v-if="deletingFile">{{ deletingFile.name }}</strong>?</p>
+            <p>Are you sure you want to delete <strong class="monospace text-warning" v-if="deletingFile">{{ deletingFile.path }}</strong>?</p>
             <p>This action cannot be undone!</p>
         </b-modal>
     </div>
@@ -50,7 +50,8 @@
         data: function() {
             return {
                 selected: null,
-                deletingFile: null,
+                deletingFile: null, // Temp storage of instance of file to delete (awaiting user confirmation)
+                deletingFiles: null, // Used to know from which array to remove the deleted file
                 newFile: '',
                 files: []
             }
@@ -99,23 +100,33 @@
 
                 this.select(obj);
             },
-            onDelete: function(file) {
+            onDelete: function(file, files) {
                 this.deletingFile = file;
+                this.deletingFiles = files;
                 this.$refs.confirmModal.show();
             },
             cancelDelete: function() {
                 this.deletingFile = null;
+                this.deletingFiles = null;
             },
-            deleteFile: function() { // TODO delete file
-                const index = this.files.indexOf(this.deletingFile);
+            deleteFile: function() {
+                const index = this.deletingFiles.indexOf(this.deletingFile);
                 if(index != -1) {
-                    this.files.splice(index, 1);
-                    localStorage.removeItem(this.deletingFile.name);
-                    this.$refs.tree.removeFile(this.deletingFile);
-                    GlobalEvent.$emit('fileDeleted', this.deletingFile.name);
-                    this.deletingFile = null;
+                    window.axios.delete('http://localhost:8081/delete', {
+                        data: {
+                            file: this.deletingFile.path
+                        }
+                    })
+                    .then(function() {
+                        this.deletingFiles.splice(index, 1);
+                        GlobalEvent.$emit('fileDeleted', this.deletingFile.path);
+                        this.cancelDelete();
 
-                    this.updateSelection();
+                        this.updateSelection();
+                    }.bind(this))
+                    .catch(function(error) {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't delete file: " + error.message});
+                    });
                 }
             },
             select: function(file) {
