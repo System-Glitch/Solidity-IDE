@@ -2,6 +2,13 @@
   "name": "solidity-ide",
   "version": "2.0.0",
   "private": true,
+  "description": "A light and easy IDE for Solidity smart contract development.",
+  "author": "SystemGlitch",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/System-Glitch/Solidity-IDE/issues"
+  },
+  "homepage": "https://github.com/System-Glitch/Solidity-IDE",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
