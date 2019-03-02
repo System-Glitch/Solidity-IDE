@@ -3,6 +3,7 @@
         <div class="p-2 d-flex flex-horizontal justify-content-between align-items-center flex-shrink-0">
             <h5 class="m-0 d-inline-block">Browser</h5>
             <div>
+                <button class="btn btn-primary btn-sm mr-1" @click="$refs.browseModal.show()" title="Open..."><i class="icon directory"></i></button>
                 <button class="btn btn-primary btn-sm" @click="updateFileList" title="Refresh"><i class="icon refresh"></i></button>
             </div>
         </div>
@@ -35,6 +36,25 @@
             <p>Are you sure you want to delete <strong class="monospace text-warning" v-if="deletingFile">{{ deletingFile.path }}</strong>?</p>
             <p>This action cannot be undone!</p>
         </b-modal>
+        <b-modal
+            ref="browseModal"
+            title="Open..."
+            ok-title="Open"
+            v-on:ok="openDirectory"
+            lazy
+            content-class="bg-transparent"
+            header-bg-variant="primary" header-text-variant="light"
+            body-bg-variant="dark" body-text-variant="light"
+            footer-bg-variant="dark" footer-text-variant="light"
+            ok-variant="success" cancel-variant="primary" :ok-disabled="directory.length == 0"
+        >
+            <b-form-group
+              label="Enter the path of the folder you want to open"
+              label-for="browseInput"
+            >
+                <b-form-input id="browseInput" v-model="directory" trim placeholder="Path..." @keyup.enter.native="openDirectory"/>
+            </b-form-group>
+        </b-modal>
     </div>
 </template>
 
@@ -53,14 +73,24 @@
                 deletingFile: null, // Temp storage of instance of file to delete (awaiting user confirmation)
                 deletingFiles: null, // Used to know from which array to remove the deleted file
                 newFile: '',
-                files: []
+                files: [],
+                directory: '',
             }
         },
         methods: {
-            updateFileList: function() {
+            updateFileList: function(directory) {
 
-                window.axios.get('http://localhost:8081/directory') // TODO don't load the whole tree at once
+                const data = {};
+
+                if(directory != undefined) {
+                    data.params = { root: directory };
+                }
+
+                window.axios.get('http://localhost:8081/directory', data) // TODO don't load the whole tree at once
                 .then(function(response) {
+                    if(directory != undefined) {
+                        localStorage['openDirectory'] = directory;
+                    }
                     this.files = [];
                     for(let key in response.data) {
                         const file = response.data[key];
@@ -127,6 +157,13 @@
                     .catch(function(error) {
                         GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't delete file: " + error.message});
                     });
+                }
+            },
+            openDirectory: function() {
+                if(this.directory) {
+                    this.updateFileList(this.directory);
+                    this.directory = '';
+                    this.$refs.browseModal.hide();
                 }
             },
             select: function(file) {
@@ -222,7 +259,7 @@
             GlobalEvent.$on('messages', this.handleFileState);
             GlobalEvent.$on('browserRefresh', this.handleBrowserRefresh);
 
-            this.updateFileList();
+            this.updateFileList(localStorage['openDirectory']);
         },
         beforeDestroy() {
             GlobalEvent.$off('fileChanged', this.handleFileChanged);
