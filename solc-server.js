@@ -24,14 +24,9 @@ app.use(function(req, res, next) {
     next();
 })
 
-app.post('/compile', function (req, res) {
+app.get('/compile', function (req, res) {
 
-    const sources = {};
-    for(let key in req.body) { // TODO use directory variable instead
-        sources[key] = {
-            content: req.body[key]
-        };
-    }
+    const sources = listDirForCompile('', {})
     const input = {
         language: 'Solidity',
         sources: sources,
@@ -44,10 +39,10 @@ app.post('/compile', function (req, res) {
         }
     }
 
-    // TODO handle imports
-
     const output = solc.compile(JSON.stringify(input))
-    res.end(output)
+    // Save built files?
+
+    res.end(output.replace(new RegExp(directory, 'g'), ''))
 })
 
 //------------------------------------
@@ -103,7 +98,7 @@ app.put('/save', function(req, res) {
         return
     }
 
-    if(req.body.content) {
+    if(req.body.content != undefined) {
         // TODO handle file permissions
         fs.writeFileSync(file, req.body.content)
         res.status(204)
@@ -126,6 +121,25 @@ function listDir(dir, result) {
         result.push(file)
         if(stats.isDirectory()) {
             file.childs = listDir(dir + item + '/', [])
+        }
+    }
+
+    return result;
+}
+
+function listDirForCompile(dir, result) {
+    const items = fs.readdirSync(directory + dir)
+
+    for(let key in items) {
+        const item = items[key]
+        const path = directory + dir + item
+        const stats = fs.lstatSync(path)
+        if(stats.isFile() && item.endsWith('.sol')) { // Skip non-sol files and non-directories
+            result[path] = { content: fs.readFileSync(path).toString() }
+        }
+
+        if(stats.isDirectory()) {
+            listDirForCompile(dir + item + '/', result)
         }
     }
 

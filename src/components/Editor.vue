@@ -29,39 +29,32 @@
         },
         methods: {
             compile: function(callback) {
-                this.saveAll();
-                GlobalEvent.$emit('clearMessages');
-                GlobalEvent.$emit('processing', true);
+                this.saveAll(() => {
+                    GlobalEvent.$emit('clearMessages');
+                    GlobalEvent.$emit('processing', true);
 
-                const data = {};
-                for (let i = 0; i < localStorage.length; i++){
-                    const key = localStorage.key(i);
-                    if(key.endsWith('.sol')) {
-                        data[key] = localStorage.getItem(key);
-                    }
-                }
+                    window.axios.get('http://localhost:8081/compile')
+                    .then(function(response) {
+                        this.errors = response.data.errors;
+                        this.updateAnnotations();
+                        if(this.errors != undefined) {
+                            GlobalEvent.$emit('messages', this.errors);
+                        }
 
-                window.axios.post('http://localhost:8081/compile', data)
-                .then(function(response) {
-                    this.errors = response.data.errors;
-                    this.updateAnnotations();
-                    if(this.errors != undefined) {
-                        GlobalEvent.$emit('messages', this.errors);
-                    }
+                        if(!this.checkHasErrors()) {
+                            GlobalEvent.$emit('message', {severity: 'success', formattedMessage: "Compilation successful."});
+                        }
 
-                    if(!this.checkHasErrors()) {
-                        GlobalEvent.$emit('message', {severity: 'success', formattedMessage: "Compilation successful."});
-                    }
-
-                    if(callback == undefined || response.data.contracts == undefined) {
+                        if(callback == undefined || response.data.contracts == undefined) {
+                            GlobalEvent.$emit('processing', false);
+                        } else {
+                            callback(response.data.contracts);
+                        }
+                    }.bind(this))
+                    .catch(function( error ) {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed: " + error.message });
                         GlobalEvent.$emit('processing', false);
-                    } else {
-                        callback(response.data.contracts);
-                    }
-                }.bind(this))
-                .catch(function( error ) {
-                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed: " + error.message });
-                    GlobalEvent.$emit('processing', false);
+                    });
                 });
             },
             deploy: function(contractName, compiledContract) {
@@ -158,7 +151,7 @@
                     GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: " + error.message });
                 });
             },
-            saveAll: function() {
+            saveAll: function(callback) {
                 const promises = [];
                 for(let key in this.sessions) {
                     promises.push(window.axios.put('http://localhost:8081/save', {
@@ -171,7 +164,11 @@
                     results.forEach(function(response) {
                         const params = JSON.parse(response.config.data);
                         GlobalEvent.$emit('fileSaved', params.file);
-                    })
+                    });
+
+                    if(callback != undefined) {
+                        callback();
+                    }
                 });
             },
             load: function(file, force) {
