@@ -104,7 +104,7 @@
                     GlobalEvent.$emit('browserRefresh');
                 }.bind(this))
                 .catch(function( error ) {
-                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch directory content: " + error.message });
+                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch directory content: " + error.response.data });
                 });
             },
             updateSelection: function() {
@@ -155,7 +155,7 @@
                         this.updateSelection();
                     }.bind(this))
                     .catch(function(error) {
-                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't delete file: " + error.message});
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't delete file: " + error.response.data });
                     });
                 }
             },

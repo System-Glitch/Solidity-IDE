@@ -148,7 +148,7 @@
                     GlobalEvent.$emit('fileSaved', file);
                 }.bind(this))
                 .catch(function(error) {
-                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: " + error.message });
+                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: " + error.response.data });
                 });
             },
             saveAll: function(callback) {
@@ -193,7 +193,7 @@
                             this.updateAnnotations();
                         }.bind(this))
                         .catch(function( error ) {
-                            GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: " + error.message });
+                            GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: " + error.response.data });
                         });
                     } else {
                         this.fileName = file;
