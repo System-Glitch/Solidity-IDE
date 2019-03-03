@@ -81,10 +81,7 @@
             updateFileList: function(directory) {
 
                 const data = {};
-
-                if(directory != undefined) {
-                    data.params = { root: directory };
-                }
+                data.params = { root: directory ? directory : localStorage['openDirectory'] };
 
                 window.axios.get('http://localhost:8081/directory', data) // TODO don't load the whole tree at once
                 .then(function(response) {
@@ -104,7 +101,11 @@
                     GlobalEvent.$emit('browserRefresh');
                 }.bind(this))
                 .catch(function( error ) {
-                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch directory content: " + error.response.data });
+                    if(error.response != undefined) {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch directory content: " + error.response.data });
+                    } else {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch directory content: no response from server"});
+                    }
                 });
             },
             updateSelection: function() {
@@ -120,15 +121,31 @@
                 if(!name.endsWith('.sol'))
                     name += '.sol';
 
-                localStorage.setItem(name, '');
-                const obj = {name: name, directory: false, saved: true, state: 0};
-                this.files.push(obj);
-                this.files.sort(this.sort);
-                this.$refs.tree.addFile(obj);
+                window.axios.post('http://localhost:8081/create', {
+                    file: name
+                })
+                .then(function() {
+                    const index = name.lastIndexOf('/');
+                    const obj = {
+                        name: name.substring(index + 1),
+                        path: name,
+                        directory: false,
+                        saved: true,
+                        state: 0
+                    };
+                    this.findDirectory(name, {path: '', directory: true, childs: this.files}, 0).push(obj);
 
-                this.newFile = '';
+                    this.newFile = '';
 
-                this.select(obj);
+                    this.select(obj);
+                }.bind(this))
+                .catch(function(error) {
+                    if(error.response != undefined) {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't create file: " + error.response.data });
+                    } else {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't create file: no response from server"});
+                    }
+                });
             },
             onDelete: function(file, files) {
                 this.deletingFile = file;
@@ -155,7 +172,11 @@
                         this.updateSelection();
                     }.bind(this))
                     .catch(function(error) {
-                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't delete file: " + error.response.data });
+                        if(error.response != undefined) {
+                            GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't delete file: " + error.response.data });
+                        } else {
+                            GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't delete file: no response from server"});
+                        }
                     });
                 }
             },
@@ -194,7 +215,7 @@
                 }
             },
             resetStates: function(dir) {
-                for(let key in dir) { // TODO not working anymore
+                for(let key in dir) {
                     dir[key].state = 0;
 
                     if(dir[key].directory) {
@@ -230,6 +251,39 @@
 
                 return null;
             },
+            findDirectory: function(path, directory, index) {
+                const lastIndex = path.lastIndexOf('/');
+                if(lastIndex == -1) return directory.childs;
+
+                const pathArr = path.split('/');
+                const length = pathArr.length;
+                const name = pathArr[index++];
+                const dirPath = pathArr.splice(0, index).join('/');
+
+
+                for(let key in directory.childs) {
+                    const dir = directory.childs[key];
+                    if(dir.directory && dir.path == dirPath) {
+                        // Dir exists
+                        return index == length - 1 ? dir.childs : this.findDirectory(path, dir, index)
+                    }
+                }
+
+                // Dir doesn't exist so create it
+
+                const obj = {
+                    name: name,
+                    path: dirPath,
+                    directory: true,
+                    state: 0,
+                    saved: true,
+                    childs: []
+                };
+                directory.childs.push(obj);
+                directory.childs.sort(this.sort);
+
+                return index == length - 1 ? obj.childs : this.findDirectory(path, obj, index);
+            },
             setFileSaved: function(fileName, saved) {
                 const file = this.findFile(this.files, fileName);
                 if(file.saved != saved) {
@@ -249,8 +303,7 @@
                 return this.newFile.length > 0 &&
                     this.newFile.length <= 255 &&
                     !this.newFile.endsWith('.') &&
-                    !this.newFile.endsWith('/') &&
-                    this.findFile(this.files, this.newFile) == null
+                    !this.newFile.endsWith('/')
             }
         },
         mounted() {

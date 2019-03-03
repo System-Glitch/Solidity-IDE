@@ -1,5 +1,6 @@
 var directory = process.argv[2] ? process.argv[2] : __dirname
 const PORT = 8081
+const FORBIDDEN_CHARACTERS = "\\\\|<|>|:|\\\"|\\'|\\||\\?|\\*|~|#|\\n|\\t|\\v|\\f|\\r"
 const fs = require('fs')
 const solc = require('solc')
 const express = require('express')
@@ -73,6 +74,34 @@ app.get('/file', function(req, res) {
         if (validateFile(file, res)) {
             res.end(fs.readFileSync(file).toString())
         }
+    } else {
+        res.status(400)
+        res.end('File is required.')
+    }
+})
+
+// Create file
+app.post('/create', function(req, res) {
+    if(req.body.file) {
+        const path = directory + req.body.file
+        if (new RegExp(FORBIDDEN_CHARACTERS).test(req.body.file)) {
+            res.status(400)
+            res.end('Given file name contains forbidden characters.')
+            return
+        } else if(!validateSolidityFile(path)) {
+            res.status(400)
+            res.end('Given file is not a solidity file.')
+            return
+        } else if (fs.existsSync(path)) {
+            res.status(400)
+            res.end('File already exists.')
+            return
+        }
+
+        fs.mkdirSync(path.substring(0, path.lastIndexOf('/')), { recursive: true })
+        fs.writeFileSync(path, '')
+        res.status(201)
+        res.end()
     } else {
         res.status(400)
         res.end('File is required.')
@@ -167,9 +196,11 @@ function validateFile(path, res) {
     return true
 }
 
-// Create directory
+function validateSolidityFile(path) {
+    return path.endsWith('.sol') && path.substring(path.lastIndexOf('/') + 1) != '.sol'
+}
 
-// TODO Create file
+// TODO Create directory without creating file
 
 //------------------------------------
 

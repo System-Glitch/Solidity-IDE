@@ -148,7 +148,11 @@
                     GlobalEvent.$emit('fileSaved', file);
                 }.bind(this))
                 .catch(function(error) {
-                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: " + error.response.data });
+                    if(error.response != undefined) {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: " + error.response.data });
+                    } else {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: no response from server"});
+                    }
                 });
             },
             saveAll: function(callback) {
@@ -193,7 +197,11 @@
                             this.updateAnnotations();
                         }.bind(this))
                         .catch(function( error ) {
-                            GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: " + error.response.data });
+                            if(error.response != undefined) {
+                                GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: " + error.response.data });
+                            } else {
+                                GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: no response from server"});
+                            }
                         });
                     } else {
                         this.fileName = file;
