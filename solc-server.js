@@ -3,6 +3,7 @@
 // <PATH>: path to the default directory (optional, use working directory if missing)
 
 const argv = require('minimist')(process.argv.slice(2));
+const FILE_SEPARATOR = process.platform == 'win32'? '\\': '/'
 var directory = argv._.length ? argv._[0] : process.cwd()
 const PORT = 8081
 const FORBIDDEN_CHARACTERS = "\\\\|<|>|:|\\\"|\\'|\\||\\?|\\*|~|#|\\n|\\t|\\v|\\f|\\r"
@@ -12,8 +13,10 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 
-if(!directory.endsWith('/'))
-    directory += '/'
+console.log("Starting solc server...")
+
+if(!directory.endsWith(FILE_SEPARATOR))
+    directory += FILE_SEPARATOR
 
 if (!fs.existsSync(directory) || !fs.lstatSync(directory).isDirectory()) {
     console.error('"' + directory + '" doesn\'t exist or is not a directory.')
@@ -219,7 +222,7 @@ app.listen(PORT, 'localhost', function () {
 })
 
 setTimeout(function() {
-    console.log("Starting ganache.")
+    console.log("Starting ganache...")
     require('ganache-cli/cli')
 }, 1);
 

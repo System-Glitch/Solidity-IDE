@@ -5,6 +5,7 @@
   "description": "A light and easy IDE for Solidity smart contract development.",
   "author": "SystemGlitch",
   "license": "MIT",
+  "main": "solc-server.js",
   "bugs": {
     "url": "https://github.com/System-Glitch/Solidity-IDE/issues"
   },

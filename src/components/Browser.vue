@@ -303,7 +303,8 @@
                 return this.newFile.length > 0 &&
                     this.newFile.length <= 255 &&
                     !this.newFile.endsWith('.') &&
-                    !this.newFile.endsWith('/')
+                    !this.newFile.endsWith('/') &&
+                    this.newFile.substring(this.newFile.lastIndexOf('/') + 1) != '.sol'
             }
         },
         mounted() {
