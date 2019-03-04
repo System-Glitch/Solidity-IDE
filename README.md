@@ -16,8 +16,12 @@ npm run build-local
 npm run ide
 ```
 
-The second command will run ganache and the solc server in the background, don't kill this process when using the IDE.
+The second command will run ganache and the solc server in the background, don't kill this process when using the IDE.  
 
+`npm run ide` accepts a path as parameter for the default directory:
+```
+npm run ide -- path/to/project
+```
 
 ## For contributors
 
@@ -28,6 +32,7 @@ npm install
 
 # Run solc server and ganache
 npm run server
+# Or npm run server -- path/to/project
 
 # Run vue.js server
 npm run serve
@@ -38,4 +43,3 @@ npm run serve
 - Dark-themed inputs
 - Config to select solc server host and ganache host
 - Optimize file browser by not loading the whole file tree at once
-- Your suggestions

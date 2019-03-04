@@ -1,9 +1,9 @@
 // OPTIONS:
-// -p <ABSOLUTE_PATH>: path to the default directory (optional, use working directory if missing)
 // -d: development mode. If set, open 'localhost:8080' in the browser, use the local build instead
+// <PATH>: path to the default directory (optional, use working directory if missing)
 
 const argv = require('minimist')(process.argv.slice(2));
-var directory = argv.p ? argv.p : process.cwd()
+var directory = argv._.length ? argv._[0] : process.cwd()
 const PORT = 8081
 const FORBIDDEN_CHARACTERS = "\\\\|<|>|:|\\\"|\\'|\\||\\?|\\*|~|#|\\n|\\t|\\v|\\f|\\r"
 const fs = require('fs')
