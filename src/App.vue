@@ -32,9 +32,31 @@
         },
         mounted() {
             var sizesHor = localStorage.getItem('split-sizes-horizontal');
-            sizesHor = sizesHor ?  JSON.parse(sizesHor) : [10, 60, 30];
+            try {
+                sizesHor = sizesHor ?  JSON.parse(sizesHor) : [10, 60, 30];
+            } catch(e) {
+                sizesHor = [10, 60, 30];
+                localStorage.setItem('split-sizes-horizontal', JSON.stringify(sizesHor));
+            }
             var sizesVer = localStorage.getItem('split-sizes-vertical');
-            sizesVer = sizesVer ?  JSON.parse(sizesVer) : [80, 20];
+
+            try {
+                sizesVer = sizesVer ?  JSON.parse(sizesVer) : [80, 20];
+            } catch(e) {
+                sizesVer = [80, 20];
+                localStorage.setItem('split-sizes-vertical', JSON.stringify(sizesVer));
+            }
+
+            // Clear legacy sizes for compatibility
+            if(!Array.isArray(sizesHor) || sizesHor.length != 3) {
+                sizesHor = [10, 60, 30];
+                localStorage.setItem('split-sizes-vertical', JSON.stringify(sizesHor));
+            }
+
+            if(!Array.isArray(sizesVer) || sizesVer.length != 1) {
+                sizesVer = [80, 20];
+                localStorage.setItem('split-sizes-vertical', JSON.stringify(sizesVer));
+            }
 
 
             this.horizontalSplit = Split(['#browser', '#editor', '#sidebar'], {
