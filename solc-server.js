@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // OPTIONS:
 // -d: development mode. If set, open 'localhost:8080' in the browser, use the local build instead
 // <PATH>: path to the default directory (optional, use working directory if missing)

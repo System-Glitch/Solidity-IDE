@@ -6,6 +6,9 @@
   "author": "SystemGlitch",
   "license": "MIT",
   "main": "solc-server.js",
+  "bin": {
+    "solidity-ide": "./solc-server.js"
+  },
   "bugs": {
     "url": "https://github.com/System-Glitch/Solidity-IDE/issues"
   },
