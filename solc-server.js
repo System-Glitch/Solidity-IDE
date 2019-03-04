@@ -1,4 +1,9 @@
-var directory = process.argv[2] ? process.argv[2] : __dirname
+// OPTIONS:
+// -p <ABSOLUTE_PATH>: path to the default directory (optional, use working directory if missing)
+// -d: development mode. If set, open 'localhost:8080' in the browser, use the local build instead
+
+const argv = require('minimist')(process.argv.slice(2));
+var directory = argv.p ? argv.p : process.cwd()
 const PORT = 8081
 const FORBIDDEN_CHARACTERS = "\\\\|<|>|:|\\\"|\\'|\\||\\?|\\*|~|#|\\n|\\t|\\v|\\f|\\r"
 const fs = require('fs')
@@ -218,8 +223,8 @@ setTimeout(function() {
     require('ganache-cli/cli')
 }, 1);
 
-if(process.argv && process.argv[2] == 'ide') { // TODO not working anymore with project directory parameter
+if(argv.d !== true) { // Not in dev mode
     const url = 'file://' + __dirname + '/dist/index.html';
-    const start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open');
-    require('child_process').exec(start + ' ' + url);
+    const start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open')
+    require('child_process').exec(start + ' ' + url)
 }

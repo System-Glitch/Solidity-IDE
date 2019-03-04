@@ -14,13 +14,14 @@
     "build": "vue-cli-service build",
     "build-local": "vue-cli-service build && node replace.js",
     "lint": "vue-cli-service lint",
-    "server": "node solc-server.js",
-    "ide": "node solc-server.js ide"
+    "server": "node solc-server.js -d",
+    "ide": "node solc-server.js"
   },
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "ganache-cli": "^6.3.0",
+    "minimist": "^1.2.0",
     "solc": "^0.5.4"
   },
   "devDependencies": {
