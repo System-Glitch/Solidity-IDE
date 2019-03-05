@@ -65,30 +65,40 @@ app.get('/compile', function (req, res) {
 //------------------------------------
 // FILESYSTEM
 
-// TODO check permissions
 app.get('/directory', function(req, res) {
-    if(req.query.root) {
-        if (!fs.existsSync(req.query.root) || !fs.lstatSync(req.query.root).isDirectory()) {
-            res.status(400);
-            res.end('Given root directory doesn\'t exist or is not a directory.');
-            return;
+    try {
+        if(req.query.root) {
+            if (!fs.existsSync(req.query.root) || !fs.lstatSync(req.query.root).isDirectory()) {
+                res.status(400);
+                res.end('Given root directory doesn\'t exist or is not a directory.');
+                return;
+            }
+            directory = req.query.root;
+
+            if(!directory.endsWith('/'))
+                directory += '/'
         }
-        directory = req.query.root;
 
-        if(!directory.endsWith('/'))
-            directory += '/'
+        const result = listDir('', [])
+        res.end(JSON.stringify(result))
+    } catch(error) {
+        res.status(403)
+        res.end(error.message)
     }
-
-    const result = listDir('', [])
-    res.end(JSON.stringify(result))
 })
 
 // Fetch file
 app.get('/file', function(req, res) {
     if(req.query.file) {
         const file = directory + req.query.file
-        if (validateFile(file, res)) {
-            res.end(fs.readFileSync(file).toString())
+        try {
+            fs.accessSync(file, fs.constants.R_OK)
+            if (validateFile(file, res)) {
+                res.end(fs.readFileSync(file).toString())
+            }
+        } catch(err) {
+            res.status(403)
+            res.end('Missing read access for "' + file + '"')
         }
     } else {
         res.status(400)
@@ -114,10 +124,15 @@ app.post('/create', function(req, res) {
             return
         }
 
-        fs.mkdirSync(path.substring(0, path.lastIndexOf('/')), { recursive: true })
-        fs.writeFileSync(path, '')
-        res.status(201)
-        res.end()
+        try {
+            fs.mkdirSync(path.substring(0, path.lastIndexOf('/')), { recursive: true })
+            fs.writeFileSync(path, '')
+            res.status(201)
+            res.end()
+        } catch(error) {
+            res.status(403)
+            res.end(error.message)
+        }
     } else {
         res.status(400)
         res.end('File is required.')
@@ -139,16 +154,14 @@ app.put('/save', function(req, res) {
     }
 
     if(req.body.content != undefined) {
-        fs.access(file, fs.constants.W_OK, (err) => {
-            if(!err) {
-                fs.writeFileSync(file, req.body.content)
-                res.status(204)
-                res.end()
-            } else {
-                res.status(403)
-                res.end('Missing write permission for "' + file + '"')
-            }
-        });
+        try {
+            fs.writeFileSync(file, req.body.content)
+            res.status(204)
+            res.end()
+        } catch(error) {
+            res.status(403)
+            res.end(error.message)
+        }
 
     } else {
         res.status(400)
@@ -161,9 +174,14 @@ app.delete('/delete', function(req, res) {
     if(req.body.file) {
         const file = directory + req.body.file
         if (validateFile(file, res)) {
-            fs.unlinkSync(file)
-            res.status(204)
-            res.end()
+            try {
+                fs.unlinkSync(file)
+                res.status(204)
+                res.end()
+            } catch(error) {
+                res.status(403)
+                res.end(error.message)
+            }
         }
 
     } else {
@@ -178,13 +196,18 @@ function listDir(dir, result) {
 
     for(let key in items) {
         const item = items[key]
-        const stats = fs.lstatSync(directory + dir + item)
-        if((stats.isFile() && !item.endsWith('.sol')) || (!stats.isFile() && !stats.isDirectory()))
-            continue; // Skip non-sol files and non-directories
-        const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true}
-        result.push(file)
-        if(stats.isDirectory()) {
-            file.childs = listDir(dir + item + '/', [])
+
+        try {
+            const stats = fs.lstatSync(directory + dir + item)
+            if((stats.isFile() && !item.endsWith('.sol')) || (!stats.isFile() && !stats.isDirectory()))
+                return; // Skip non-sol files and non-directories
+            const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true}
+            result.push(file)
+            if(stats.isDirectory()) {
+                file.childs = listDir(dir + item + '/', [])
+            }
+        } catch(err) {
+            // Ignore files without permission
         }
     }
 
@@ -199,7 +222,11 @@ function listDirForCompile(dir, result) {
         const path = directory + dir + item
         const stats = fs.lstatSync(path)
         if(stats.isFile() && item.endsWith('.sol')) { // Skip non-sol files and non-directories
-            result[path] = { content: fs.readFileSync(path).toString() }
+            fs.access(file, fs.constants.R_OK, (err) => {
+                if(!err) {
+                    result[path] = { content: fs.readFileSync(path).toString() }
+                }
+            });
         }
 
         if(stats.isDirectory()) {
@@ -211,9 +238,15 @@ function listDirForCompile(dir, result) {
 }
 
 function validateFile(path, res) {
-    if (!fs.existsSync(path) || !fs.lstatSync(path).isFile() || !path.endsWith('.sol')) {
-        res.status(400)
-        res.end('Given file doesn\'t exist or is not a solidity file.')
+    try {
+        if (!fs.existsSync(path) || !fs.lstatSync(path).isFile() || !path.endsWith('.sol')) {
+            res.status(400)
+            res.end('Given file doesn\'t exist or is not a solidity file.')
+            return false
+        }
+    } catch(error) {
+        res.status(403)
+        res.end(error.message)
         return false
     }
     return true

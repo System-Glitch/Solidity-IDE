@@ -207,12 +207,15 @@
                             this.updateAnnotations();
                         }.bind(this))
                         .catch(function( error ) {
+                            GlobalEvent.$emit('clearMessages');
                             if(error.response != undefined) {
                                 GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: " + error.response.data });
                             } else {
                                 GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: no response from server"});
                             }
-                        });
+                            this.editor.setSession(this.defaultSession);
+                            this.editor.setReadOnly(true);
+                        }.bind(this));
                     } else {
                         this.fileName = file;
                         localStorage.setItem('openFile', file);
