@@ -22,12 +22,12 @@ The second command will run ganache and the solc server in the background, don't
 
 `npm run ide` accepts a path as parameter for the default directory:
 ```
-npm run ide -- path/to/project
+npm run ide -- --path=path/to/project
 ```
 
-You can pass ganache-cli parameters aswell:
+You can pass ganache-cli parameters as well:
 ```
-npm run ide -- path/to/project -a 20 # Generate 20 accounts on startup
+npm run ide -- --path=path/to/project -a 20 # Generate 20 accounts on startup
 ```
 
 ## For contributors
@@ -39,7 +39,7 @@ npm install
 
 # Run solc server and ganache
 npm run server
-# Or npm run server -- path/to/project
+# Or npm run server -- --path=path/to/project
 # Also accepts ganache-cli parameters
 
 # Run vue.js server

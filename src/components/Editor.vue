@@ -29,8 +29,8 @@
         },
         methods: {
             compile: function(callback) {
+                GlobalEvent.$emit('clearMessages');
                 this.saveAll(() => {
-                    GlobalEvent.$emit('clearMessages');
                     GlobalEvent.$emit('processing', true);
 
                     window.axios.get('http://localhost:8081/compile')
@@ -140,7 +140,7 @@
                 return false;
             },
             save: function(file, content) {
-                window.axios.put('http://localhost:8081/save', {
+                return window.axios.put('http://localhost:8081/save', {
                     file: file,
                     content: content
                 })
@@ -158,22 +158,32 @@
             saveAll: function(callback) {
                 const promises = [];
                 for(let key in this.sessions) {
-                    promises.push(window.axios.put('http://localhost:8081/save', {
-                        file: key,
-                        content: this.sessions[key].getValue()
-                    }))
+                    promises.push(
+                        window.axios.put('http://localhost:8081/save', {
+                            file: key,
+                            content: this.sessions[key].getValue()
+                        })
+                        .then(() => {
+                            GlobalEvent.$emit('fileSaved', key);
+                        })
+                        .catch((error) => {
+                            if(error.response != undefined) {
+                                GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: " + error.response.data });
+                            } else {
+                                GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: no response from server"});
+                            }
+                            return Promise.reject();
+                        })
+                    );
                 }
 
-                window.axios.all(promises).then(function(results) {
-                    results.forEach(function(response) {
-                        const params = JSON.parse(response.config.data);
-                        GlobalEvent.$emit('fileSaved', params.file);
-                    });
-
+                window.axios.all(promises)
+                .then(function() {
                     if(callback != undefined) {
                         callback();
                     }
-                });
+                })
+                .catch(() => null);
             },
             load: function(file, force) {
                 if(file != null) {

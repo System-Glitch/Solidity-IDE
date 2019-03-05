@@ -1,11 +1,18 @@
 #!/usr/bin/env node
 // OPTIONS:
 // -d: development mode. If set, open 'localhost:8080' in the browser, use the local build instead
-// <PATH>: path to the default directory (optional, use working directory if missing)
+// --path=<PATH>: path to the default directory (optional, use working directory if missing)
 
 const argv = require('minimist')(process.argv.slice(2));
+for(let key in process.argv) {
+    if(process.argv[key].startsWith('--path=')) {
+        process.argv.splice(key, 1);
+        break;
+    }
+}
+
 const FILE_SEPARATOR = process.platform == 'win32'? '\\': '/'
-var directory = argv._.length ? argv._[0] : process.cwd()
+var directory = argv.path ? argv.path : process.cwd()
 const PORT = 8081
 const FORBIDDEN_CHARACTERS = "\\\\|<|>|:|\\\"|\\'|\\||\\?|\\*|~|#|\\n|\\t|\\v|\\f|\\r"
 const fs = require('fs')
@@ -132,10 +139,17 @@ app.put('/save', function(req, res) {
     }
 
     if(req.body.content != undefined) {
-        // TODO handle file permissions
-        fs.writeFileSync(file, req.body.content)
-        res.status(204)
-        res.end()
+        fs.access(file, fs.constants.W_OK, (err) => {
+            if(!err) {
+                fs.writeFileSync(file, req.body.content)
+                res.status(204)
+                res.end()
+            } else {
+                res.status(403)
+                res.end('Missing write permission for "' + file + '"')
+            }
+        });
+
     } else {
         res.status(400)
         res.end('Content is required.')
