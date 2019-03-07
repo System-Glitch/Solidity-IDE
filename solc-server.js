@@ -91,14 +91,13 @@ app.get('/directory', function(req, res) {
 app.get('/file', function(req, res) {
     if(req.query.file) {
         const file = directory + req.query.file
-        try {
-            fs.accessSync(file, fs.constants.R_OK)
-            if (validateFile(file, res)) {
+        if (validateFile(file, res)) {
+            try {
                 res.end(fs.readFileSync(file).toString())
+            } catch(error) {
+                res.status(403)
+                res.end(error.message)
             }
-        } catch(err) {
-            res.status(403)
-            res.end('Missing read access for "' + file + '"')
         }
     } else {
         res.status(400)
@@ -240,7 +239,8 @@ function listDirForCompile(dir, result) {
 
 function validateFile(path, res) {
     try {
-        if (!fs.existsSync(path) || !fs.lstatSync(path).isFile() || !path.endsWith('.sol')) {
+        fs.accessSync(path, fs.constants.S_IFREG & fs.constants.R_OK);
+        if (!path.endsWith('.sol')) {
             res.status(400)
             res.end('Given file doesn\'t exist or is not a solidity file.')
             return false
