@@ -83,7 +83,7 @@
                 const data = {};
                 data.params = { root: directory ? directory : localStorage['openDirectory'] };
 
-                window.axios.get('http://localhost:8081/directory', data) // TODO don't load the whole tree at once
+                window.axios.get('http://localhost:8081/directory', data)
                 .then(function(response) {
                     if(directory != undefined) {
                         localStorage['openDirectory'] = directory;
@@ -109,6 +109,7 @@
                 });
             },
             updateSelection: function() {
+                // TODO load needed directories if selected is not in root
                 const file = this.selected != null ? this.findFile(this.files, this.selected.path) : null;
                 if(this.selected != file)
                     this.selected = file;

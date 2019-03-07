@@ -215,9 +215,7 @@ function listDir(dir) {
             const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true}
             result.push(file)
             if(stats.isDirectory()) {
-                file.childs = listDir(dir + item + '/')
-                // TODO not recursive
-                // file.childs = []
+                file.childs = []
             }
         } catch(err) {
             // Ignore files without permission
