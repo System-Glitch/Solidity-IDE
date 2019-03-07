@@ -69,17 +69,28 @@ app.get('/directory', function(req, res) {
     try {
         if(req.query.root) {
             if (!fs.existsSync(req.query.root) || !fs.lstatSync(req.query.root).isDirectory()) {
-                res.status(400);
-                res.end('Given root directory doesn\'t exist or is not a directory.');
-                return;
+                res.status(400)
+                res.end('Given root directory doesn\'t exist or is not a directory.')
+                return
             }
-            directory = req.query.root;
+            directory = req.query.root
 
             if(!directory.endsWith('/'))
                 directory += '/'
         }
 
-        const result = listDir('', [])
+        if(req.query.dir) {
+            if (!fs.existsSync(directory + req.query.dir) || !fs.lstatSync(directory + req.query.dir).isDirectory()) {
+                res.status(400)
+                res.end('Given directory doesn\'t exist or is not a directory.')
+                return
+            }
+
+            if(!req.query.dir.endsWith('/'))
+                req.query.dir += '/'
+        }
+
+        const result = listDir(req.query.dir ? req.query.dir : '')
         res.end(JSON.stringify(result))
     } catch(error) {
         res.status(403)
@@ -190,7 +201,8 @@ app.delete('/delete', function(req, res) {
     }
 })
 
-function listDir(dir, result) {
+function listDir(dir) {
+    const result = []
     const items = fs.readdirSync(directory + dir)
 
     for(let key in items) {
@@ -199,11 +211,11 @@ function listDir(dir, result) {
         try {
             const stats = fs.lstatSync(directory + dir + item)
             if((stats.isFile() && !item.endsWith('.sol')) || (!stats.isFile() && !stats.isDirectory()))
-                return; // Skip non-sol files and non-directories
+                continue; // Skip non-sol files and non-directories
             const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true}
             result.push(file)
             if(stats.isDirectory()) {
-                file.childs = listDir(dir + item + '/', [])
+                file.childs = listDir(dir + item + FILE_SEPARATOR)
             }
         } catch(err) {
             // Ignore files without permission
