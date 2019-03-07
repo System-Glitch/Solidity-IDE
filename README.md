@@ -1,4 +1,4 @@
-# Solidity IDE
+<h1 height="256"><img align="left" width="41" height="41" src="public/favicon.png">Solidity IDE</h1>
 
 > A simple alternative to Remix IDE, working with Vue.js and Ganache
 
