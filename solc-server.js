@@ -222,11 +222,12 @@ function listDirForCompile(dir, result) {
         const path = directory + dir + item
         const stats = fs.lstatSync(path)
         if(stats.isFile() && item.endsWith('.sol')) { // Skip non-sol files and non-directories
-            fs.access(file, fs.constants.R_OK, (err) => {
-                if(!err) {
-                    result[path] = { content: fs.readFileSync(path).toString() }
-                }
-            });
+            try {
+                fs.accessSync(path, fs.constants.R_OK)
+                result[path] = { content: fs.readFileSync(path).toString() }
+            } catch(err) {
+                // Skip if no read permission
+            }
         }
 
         if(stats.isDirectory()) {
