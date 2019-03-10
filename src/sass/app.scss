@@ -175,6 +175,14 @@ body, html {
     color: #fff;
 }
 
+.list-group-item .icon.directory, .list-group-item .icon.file {
+    opacity: 0.7;
+}
+
+.list-group-item:hover > span > .icon.directory, .list-group-item:hover > span > .icon.file, .list-group-item.active > span > .icon.file {
+    opacity: 1;
+}
+
 .selected-indicator {
     display: block;
     position: absolute;
