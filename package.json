@@ -49,7 +49,7 @@
     "split.js": "^1.5.10",
     "vue": "^2.6.8",
     "vue-template-compiler": "^2.6.8",
-    "web3": "^1.0.0-beta.48",
+    "web3": "1.0.0-beta.46",
     "webpack": "^4.29.6"
   },
   "eslintConfig": {

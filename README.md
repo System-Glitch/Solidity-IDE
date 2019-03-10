@@ -30,6 +30,8 @@ You can pass ganache-cli parameters as well:
 npm run ide -- --path=path/to/project -a 20 # Generate 20 accounts on startup
 ```
 
+If you get an error like "_Couldn't fetch..._" on startup, this is probably because the IDE opened before the server finished loading. Just click "_refresh_" and you should be good to go.
+
 ### Getting started
 
 #### File management
@@ -45,6 +47,8 @@ The next step is to create a file using the file browser. You can create files i
 At the top right of the screen is the accounts panel. This panel allows you to manage ganache account. You can select which account you're currently using. When sending a transaction or depolying a contract, the fees will be withdrawn from the selected account.
 
 <p align="center"><img src=".github/accounts.png" alt="Accounts panel"></p>
+
+If the list is empty, this is probably because the IDE opened before the server finished loading. Just click "_refresh_".
 
 #### Compile, deploy and test
 
