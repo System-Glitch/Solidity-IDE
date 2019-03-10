@@ -74,7 +74,7 @@
                 deletingFiles: null, // Used to know from which array to remove the deleted file
                 newFile: '',
                 files: [],
-                directory: '',
+                directory: ''
             }
         },
         methods: {
@@ -98,6 +98,7 @@
                     this.updateSelection();
                     this.$refs.rootDirectory.open = true;
                     this.$refs.rootDirectory.updateSelectedOpen();
+
                     GlobalEvent.$emit('browserRefresh');
                 }.bind(this))
                 .catch(function( error ) {
@@ -134,7 +135,7 @@
                         saved: true,
                         state: 0
                     };
-                    this.findDirectory(name, {path: '', directory: true, childs: this.files}, 0).push(obj);
+                    this.findDirectory(name, {path: '', directory: true, childs: this.files}, 0).childs.push(obj);
 
                     this.newFile = '';
 
@@ -210,9 +211,36 @@
                     }
                 }
             },
+            loadDirectory: function(path, directory, directoryComponent, index) {
+                const pathArr = path.split('/');
+                const dirPath = pathArr.splice(0, index++).join('/');
+                const dir = this.findDirectory(dirPath + '/', directory, 0);
+                if(dir) {
+                    const subdirCmp = directoryComponent.$refs['directory_' + dir.path];
+                    if(subdirCmp[0]) {
+                        subdirCmp[0].toggleOpen((subdir) => {
+                            if(subdir.path == path.substring(0, path.lastIndexOf('/'))) {
+                                this.select(this.findFile(this.files, localStorage['openFile']));
+                            } else {
+                                setTimeout(() => {
+                                    this.loadDirectory(path, subdir, subdirCmp[0], index);
+                                }, 0);
+                            }
+                        });
+                    }
+                }
+            },
             handleBrowserRefresh: function() {
-                if(localStorage['openFile']) {
-                    this.select(this.findFile(this.files, localStorage['openFile']));
+                const openFile = localStorage['openFile'];
+                if(openFile) {
+                    if(openFile.indexOf('/') != -1) { // Is in subdirectory
+                        setTimeout(() => {
+                            this.loadDirectory(openFile, {path: '', directory: true, childs: this.files}, this.$refs.rootDirectory, 1);
+                        }, 0);
+                    } else {
+                        this.select(this.findFile(this.files, openFile));
+                    }
+
                 }
             },
             resetStates: function(dir) {
@@ -254,7 +282,7 @@
             },
             findDirectory: function(path, directory, index) {
                 const lastIndex = path.lastIndexOf('/');
-                if(lastIndex == -1) return directory.childs;
+                if(lastIndex == -1) return directory;
 
                 const pathArr = path.split('/');
                 const length = pathArr.length;
@@ -266,7 +294,7 @@
                     const dir = directory.childs[key];
                     if(dir.directory && dir.path == dirPath) {
                         // Dir exists
-                        return index == length - 1 ? dir.childs : this.findDirectory(path, dir, index)
+                        return index == length - 1 ? dir : this.findDirectory(path, dir, index);
                     }
                 }
 
@@ -283,7 +311,7 @@
                 directory.childs.push(obj);
                 directory.childs.sort(this.sort);
 
-                return index == length - 1 ? obj.childs : this.findDirectory(path, obj, index);
+                return index == length - 1 ? obj : this.findDirectory(path, obj, index);
             },
             setFileSaved: function(fileName, saved) {
                 const file = this.findFile(this.files, fileName);
@@ -314,7 +342,7 @@
             GlobalEvent.$on('messages', this.handleFileState);
             GlobalEvent.$on('browserRefresh', this.handleBrowserRefresh);
 
-            this.updateFileList(localStorage['openDirectory']);
+            this.updateFileList();
         },
         beforeDestroy() {
             GlobalEvent.$off('fileChanged', this.handleFileChanged);

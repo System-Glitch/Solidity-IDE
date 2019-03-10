@@ -1,6 +1,6 @@
 <template>
     <b-list-group-item class="d-flex flex-column" :title="directory ? directory.name : ''">
-        <span v-on:click="toggleOpen" class="pl-0 py-1 pr-2 text-nowrap" v-if="directory">
+        <span v-on:click="toggleOpen()" class="pl-0 py-1 pr-2 text-nowrap" v-if="directory">
             <span class="icon icon-pad" :class="open ? 'directory-open' : 'directory'"></span>
             {{ directory.name }}
         </span>
@@ -82,7 +82,7 @@
                 if(event != undefined)
                     event.stopPropagation();
             },
-            toggleOpen: function() {
+            toggleOpen: function(callback) {
                 if(this.files.indexOf(this.selected) == -1) {
                     this.open = !this.open;
                     if(this.open && this.directory && this.files.length == 0) {
@@ -90,6 +90,10 @@
                         .then(function(response) {
                             this.directory.childs = response.data;
                             this.updateSelectedIndicator();
+
+                            if(callback) {
+                                callback(this.directory);
+                            }
                         }.bind(this))
                         .catch(function( error ) {
                             if(error.response != undefined) {
