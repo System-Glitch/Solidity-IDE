@@ -135,7 +135,7 @@
                         saved: true,
                         state: 0
                     };
-                    this.findDirectory(name, {path: '', directory: true, childs: this.files}, 0).childs.push(obj);
+                    this.findDirectory(name, {path: '', directory: true, childs: this.files}, 0, true).childs.push(obj);
 
                     this.newFile = '';
 
@@ -214,7 +214,7 @@
             loadDirectory: function(path, directory, directoryComponent, index) {
                 const pathArr = path.split('/');
                 const dirPath = pathArr.splice(0, index++).join('/');
-                const dir = this.findDirectory(dirPath + '/', directory, 0);
+                const dir = this.findDirectory(dirPath + '/', directory, 0, false);
                 if(dir) {
                     const subdirCmp = directoryComponent.$refs['directory_' + dir.path];
                     if(subdirCmp[0]) {
@@ -280,7 +280,7 @@
 
                 return null;
             },
-            findDirectory: function(path, directory, index) {
+            findDirectory: function(path, directory, index, createIfMissing) {
                 const lastIndex = path.lastIndexOf('/');
                 if(lastIndex == -1) return directory;
 
@@ -294,24 +294,28 @@
                     const dir = directory.childs[key];
                     if(dir.directory && dir.path == dirPath) {
                         // Dir exists
-                        return index == length - 1 ? dir : this.findDirectory(path, dir, index);
+                        return index == length - 1 ? dir : this.findDirectory(path, dir, index, createIfMissing);
                     }
                 }
 
-                // Dir doesn't exist so create it
+                if(createIfMissing) {
+                    // Dir doesn't exist so create it
 
-                const obj = {
-                    name: name,
-                    path: dirPath,
-                    directory: true,
-                    state: 0,
-                    saved: true,
-                    childs: []
-                };
-                directory.childs.push(obj);
-                directory.childs.sort(this.sort);
+                    const obj = {
+                        name: name,
+                        path: dirPath,
+                        directory: true,
+                        state: 0,
+                        saved: true,
+                        childs: []
+                    };
+                    directory.childs.push(obj);
+                    directory.childs.sort(this.sort);
 
-                return index == length - 1 ? obj : this.findDirectory(path, obj, index);
+                    return index == length - 1 ? obj : this.findDirectory(path, obj, index, createIfMissing);
+                } else {
+                    return null;
+                }
             },
             setFileSaved: function(fileName, saved) {
                 const file = this.findFile(this.files, fileName);
