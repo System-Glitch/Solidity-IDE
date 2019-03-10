@@ -1,17 +1,19 @@
 var isCtrl = false;
 var isF5 = false;
 var isR = false;
-document.onkeyup = function(e){
-    if(e.keyCode == 17) isCtrl = false;
-    else if(e.code == 'F5') isF5 = false;
-    else if(e.code == 'r') isR = false;
+
+document.onkeyup = function(e) {
+    if(e.ctrlKey) isCtrl = false;
+    else if(e.key == 'F5') isF5 = false;
+    else if(e.key == 'r') isR = false;
 }
 
-document.onkeydown = function(e){
-    if(e.keyCode == 17) isCtrl = true;
-    else if(e.code == 'F5') isF5 = true;
-    else if(e.code == 'r') isR = true;
-    if(e.keyCode == 83 && isCtrl == true) {
+document.onkeydown = function(e) {
+    if(e.ctrlKey) isCtrl = true;
+    else if(e.key == 'F5') isF5 = true;
+    else if(e.key == 'r') isR = true;
+
+    if(e.key == 's' && e.ctrlKey) {
         GlobalEvent.$emit('compile');
         return false;
     }

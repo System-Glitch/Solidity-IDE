@@ -58,11 +58,12 @@
                 const activeAccount = window.accountManager.getActiveAccount();
                 try {
                     const params = JSON.parse(data.params);
-                    if(params.length < data.method.inputs.length)
+                    if(params.length < data.method.inputs.length) {
                         throw {message:
                                 'Invalid number of parameters for "' + data.method.name +
                                 '". Got ' + params.length + ' expected ' + data.method.inputs.length + '!'
                             };
+                    }
 
                     if(data.method.stateMutability == 'view' || data.method.stateMutability == 'pure') {
                         method.apply(null, params).call({from: activeAccount.address})
@@ -76,14 +77,15 @@
                         });
                     } else {
                         method.apply(null, params).send({value: data.amount, from: activeAccount.address})
-                        .on('error', (result) => {
-                            this.editor.getSession().setMode(null);
-                            this.setMessage(result.message);
-                            GlobalEvent.$emit('refreshAccounts', "all");
-                        })
-                        .on('receipt', (result) => {
+                        .then((result) => {
                             this.editor.getSession().setMode('ace/mode/json');
                             this.setMessage(JSON.stringify(result, null, 4));
+                            GlobalEvent.$emit('refreshAccounts', "all");
+                        })
+                        .catch((result) => {
+                            const error = JSON.parse(result.message.replace("Node error: ", ""));
+                            this.editor.getSession().setMode(null);
+                            this.setMessage(error.message);
                             GlobalEvent.$emit('refreshAccounts', "all");
                         });
                     }
@@ -95,6 +97,7 @@
             setMessage: function(message) {
                 this.editor.setValue(message);
                 this.editor.gotoLine(0, 0, false);
+                this.editor.getSession().setScrollLeft(0);
             }
         },
         beforeDestroy() {

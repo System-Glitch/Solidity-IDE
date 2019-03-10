@@ -10,7 +10,7 @@
 
 body, html {
     height: 100%;
-    min-width: 600px;
+    min-width: 800px;
     min-height: 500px;
 }
 
@@ -155,6 +155,69 @@ body, html {
     border-bottom: 1px solid #878787;
 }
 
+.bg-dark .list-group-item {
+    color: #9f9f9f;
+    background-color: var(--dark);
+}
+
+.list-group-item .close {
+    color: #fff;
+    z-index: 1;
+}
+
+.list-group-item.active > span {
+    color: #fff;
+    z-index: 1;
+}
+
+.list-group-item:hover > * {
+    cursor: pointer;
+    color: #fff;
+}
+
+.list-group-item .icon.directory, .list-group-item .icon.file {
+    opacity: 0.7;
+}
+
+.list-group-item:hover > span > .icon.directory, .list-group-item:hover > span > .icon.file, .list-group-item.active > span > .icon.file {
+    opacity: 1;
+}
+
+.selected-indicator {
+    display: block;
+    position: absolute;
+    opacity: 0;
+    left: 0;
+    top: 0;
+    right: 0;
+    height: 100%;
+    background-color: #3e444a;
+    border-left: 3px solid var(--info);
+}
+
+.list-group-item.active .selected-indicator {
+    opacity: 1;
+}
+
+.list-group-item {
+    border-radius: 0 !important;
+    border: none;
+    padding: 0;
+    user-select: none;
+}
+
+.list-group-item > .list-group {
+    padding-left: 0.5rem;
+}
+
+.list-group-item > .close {
+    display: none;
+}
+
+.list-group-item:hover > .close {
+    display: inline-block;
+}
+
 .alert-dismissible .close {
     padding: 0 0.25rem !important;
 }
@@ -185,4 +248,41 @@ body, html {
 
 .gutter-vertical:hover {
     cursor: row-resize;
+}
+
+.icon {
+    background-repeat: no-repeat;
+    padding-left: 16px;
+    padding-right: 0px;
+    background-position: center;
+}
+
+.icon.icon-pad {
+    background-position: 2px center;
+    padding-left: 19px;
+    padding-right: 6px;
+}
+
+.icon.directory {
+    background-image: url('~@/assets/icons/folder.png');
+}
+
+.icon.directory-open {
+    background-image: url('~@/assets/icons/folder_open.png');
+}
+
+.icon.file {
+    background-image: url('~@/assets/icons/file.png');
+}
+
+.icon.refresh {
+    background-image: url('~@/assets/icons/refresh.png');
+}
+
+.modal-body {
+    word-wrap: break-word;
+}
+
+.file {
+    min-width: 100px;
 }

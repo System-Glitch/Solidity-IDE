@@ -15,56 +15,46 @@
 
     export default {
         name: "editor",
-        props: {
-            fileName: {
-                type: String,
-                default: 'contract.sol' // TODO file name
-            }
-        },
         data: function() {
             return {
                 editor: null,
                 langTools: null,
                 fontSize: 14,
                 content: [],
+                fileName: '',
+                sessions: {},
+                errors: undefined,
+                defaultSession: null
             }
         },
         methods: {
             compile: function(callback) {
-                this.save();
                 GlobalEvent.$emit('clearMessages');
-                GlobalEvent.$emit('processing', true);
+                this.saveAll(() => {
+                    GlobalEvent.$emit('processing', true);
 
-                const data = {};
-                data[this.fileName] = this.editor.getValue();
+                    window.axios.get('http://localhost:8081/compile')
+                    .then(function(response) {
+                        this.errors = response.data.errors;
+                        this.updateAnnotations();
+                        if(this.errors != undefined) {
+                            GlobalEvent.$emit('messages', this.errors);
+                        }
 
-                window.axios.post('http://localhost:8081/compile', data)
-                .then(function(response) {
-                    this.clearMarkers();
-                    this.editor.getSession().clearAnnotations();
-                    if(response.data.contracts != undefined) {
-                        for(let key in response.data.contracts) {
-                            GlobalEvent.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
-                            if(callback != undefined) {
-                                callback(response.data.contracts[key]);
-                            }
+                        if(!this.checkHasErrors()) {
+                            GlobalEvent.$emit('message', {severity: 'success', formattedMessage: "Compilation successful."});
                         }
-                    } else if(response.data.errors == undefined) {
-                        for(let key in response.data.sources) {
-                            GlobalEvent.$emit('message', {severity: 'success', formattedMessage: key + ": Compilation successful."});
+
+                        if(callback == undefined || response.data.contracts == undefined) {
+                            GlobalEvent.$emit('processing', false);
+                        } else {
+                            callback(response.data.contracts);
                         }
-                    }
-                    if(response.data.errors != undefined) {
-                        GlobalEvent.$emit('messages', response.data.errors);
-                        this.editor.getSession().setAnnotations(this.buildAnnotations(response.data.errors));
-                    }
-                    if(callback == undefined || response.data.contracts == undefined) {
+                    }.bind(this))
+                    .catch(function( error ) {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed: " + error.message });
                         GlobalEvent.$emit('processing', false);
-                    }
-                }.bind(this))
-                .catch(function( error ) {
-                    GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Compilation request failed: " + error.message });
-                    GlobalEvent.$emit('processing', false);
+                    });
                 });
             },
             deploy: function(contractName, compiledContract) {
@@ -90,21 +80,38 @@
                     GlobalEvent.$emit('processing', false);
                 });
             },
+            deployFile: function(file) {
+                for(let key in file) {
+                    this.deploy(key, file[key]);
+                }
+            },
             compileAndDeploy: function() {
-                this.compile(function(contracts) {
+                this.compile(function(files) {
                     if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
                         GlobalEvent.$emit('refreshAccounts', window.accountManager.selectedAccount, () => {
-                            for(let key in contracts) {
-                                this.deploy(key, contracts[key]);
+                            for(let key in files) {
+                                this.deployFile(files[key]);
                             }
                         });
                     } else {
-                        for(let key in contracts) {
-                            this.deploy(key, contracts[key]);
+                        for(let key in files) {
+                            this.deployFile(files[key]);
                         }
                     }
-
                 }.bind(this));
+            },
+            clear: function() {
+                for(let key in this.sessions) {
+                    const session = this.sessions[key];
+                    this.clearMarkers(session);
+                    session.clearAnnotations();
+                }
+            },
+            updateAnnotations: function() {
+                this.clear();
+                if(this.errors != undefined) {
+                    this.buildAnnotations();
+                }
             },
             checkAbi: function(abi) { // Checks if abi contains a least one constructor. Injects default one if missing
                 for(let key in abi) {
@@ -122,49 +129,142 @@
                     type: "constructor"
                 });
             },
-            save: function() {
-                localStorage[this.fileName] = this.editor.getValue(); // TODO handle multiple files
+            checkHasErrors: function() {
+                if(this.errors != undefined) {
+                    for(let key in this.errors) {
+                        if(this.errors[key].severity == 'error') {
+                            return true;
+                        }
+                    }
+                }
+                return false;
             },
-            load: function(contract) {
-                if(localStorage[contract]) {
-                    const session = ace.createEditSession(localStorage[contract], 'ace/mode/solidity');
-                    this.editor.setSession(session);
+            save: function(file, content) {
+                return window.axios.put('http://localhost:8081/save', {
+                    file: file,
+                    content: content
+                })
+                .then(function() {
+                    GlobalEvent.$emit('fileSaved', file);
+                }.bind(this))
+                .catch(function(error) {
+                    if(error.response != undefined) {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: " + error.response.data });
+                    } else {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: no response from server"});
+                    }
+                });
+            },
+            saveAll: function(callback) {
+                const promises = [];
+                for(let key in this.sessions) {
+                    promises.push(
+                        window.axios.put('http://localhost:8081/save', {
+                            file: key,
+                            content: this.sessions[key].getValue()
+                        })
+                        .then(() => {
+                            GlobalEvent.$emit('fileSaved', key);
+                        })
+                        .catch((error) => {
+                            if(error.response != undefined) {
+                                GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: " + error.response.data });
+                            } else {
+                                GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't save file: no response from server"});
+                            }
+                            return Promise.reject();
+                        })
+                    );
+                }
+
+                window.axios.all(promises)
+                .then(function() {
+                    if(callback != undefined) {
+                        callback();
+                    }
+                })
+                .catch(() => null);
+            },
+            load: function(file, force) {
+                if(file != null) {
+                    if(this.sessions[file] == undefined || force) {
+                        window.axios.get('http://localhost:8081/file', {
+                            params: {
+                                file: file
+                            }
+                        })
+                        .then(function(response) {
+                            this.sessions[file] = ace.createEditSession(response.data, 'ace/mode/solidity');
+                            this.sessions[file].on('change', function() {
+                                GlobalEvent.$emit('fileChanged', file);
+                            });
+                            this.fileName = file;
+                            localStorage.setItem('openFile', file);
+                            this.editor.setSession(this.sessions[file]);
+                            this.editor.setReadOnly(false);
+                            this.editor.focus();
+
+                            this.updateAnnotations();
+                        }.bind(this))
+                        .catch(function( error ) {
+                            GlobalEvent.$emit('clearMessages');
+                            if(error.response != undefined) {
+                                GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: " + error.response.data });
+                            } else {
+                                GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch file content: no response from server"});
+                            }
+                            this.editor.setSession(this.defaultSession);
+                            this.editor.setReadOnly(true);
+                        }.bind(this));
+                    } else {
+                        this.fileName = file;
+                        localStorage.setItem('openFile', file);
+                        this.editor.setSession(this.sessions[file]);
+                        this.editor.setReadOnly(false);
+                        this.editor.focus();
+                    }
+                } else {
+                    this.fileName = null;
+                    this.editor.setSession(this.defaultSession);
+                    this.editor.setReadOnly(true);
+                    this.updateAnnotations();
                 }
             },
-            buildAnnotations: function(errors) {
-                const result = [];
-                for(let key in errors) {
-                    const message = errors[key];
+            buildAnnotations: function() {
+                for(let key in this.errors) {
+                    const message = this.errors[key];
+                    const session = this.sessions[message.sourceLocation.file];
 
-                    if(message.sourceLocation.file == this.fileName) {
-                        const rowStart = this.getRowAtPosition(message.sourceLocation.start);
-                        const rowEnd = this.getRowAtPosition(message.sourceLocation.end);
-                        const colStart = message.sourceLocation.start - this.getStartPositionForRow(rowStart) - 1;
-                        const colEnd = message.sourceLocation.end - this.getStartPositionForRow(rowEnd) - 1;
+                    if(session != undefined) {
+                        const rowStart = this.getRowAtPosition(session, message.sourceLocation.start);
+                        const rowEnd = this.getRowAtPosition(session, message.sourceLocation.end);
+                        const colStart = message.sourceLocation.start - this.getStartPositionForRow(session, rowStart) - 1;
+                        const colEnd = message.sourceLocation.end - this.getStartPositionForRow(session, rowEnd) - 1;
 
                         const annotation = {
                             row: rowStart,
                             column: colStart,
                             text: message.message,
                             type: message.severity
-                        }
-                        result.push(annotation);
+                        };
+
                         const range = new Range(rowStart, colStart, rowEnd, colEnd);
-                        this.editor.getSession().addMarker(range, this.getMarkerClass(message.severity), "line", false);
+                        session.addMarker(range, this.getMarkerClass(message.severity), "line", false);
+                        session.getAnnotations().push(annotation);
+                        session.setAnnotations(session.getAnnotations());
                     }
                 }
-                return result;
             },
-            clearMarkers: function() {
-                const markers = this.editor.getSession().getMarkers();
+            clearMarkers: function(session) {
+                const markers = session.getMarkers();
                 for(let key in markers) {
                     const marker = markers[key];
                     if(marker.clazz.indexOf('marker-') == 0)
-                        this.editor.getSession().removeMarker(marker.id);
+                        session.removeMarker(marker.id);
                 }
             },
-            getRowAtPosition: function(pos) {
-                const text = this.editor.getValue();
+            getRowAtPosition: function(session, pos) {
+                const text = session.getValue();
                 var count = 0;
                 for(let i = 0 ; i < pos ; i++) {
                     if(text.charAt(i) == '\n') {
@@ -173,8 +273,8 @@
                 }
                 return count;
             },
-            getStartPositionForRow: function(row) {
-                const text = this.editor.getValue();
+            getStartPositionForRow: function(session, row) {
+                const text = session.getValue();
                 const length = text.length;
                 var count = 0;
 
@@ -210,6 +310,34 @@
 
                 localStorage['font-size'] = this.fontSize;
                 this.editor.setFontSize(this.fontSize);
+            },
+            handleFileDelete: function(file) {
+                if(this.sessions[file] != undefined) {
+                    if(file == this.fileName) {
+                        this.editor.setSession(this.defaultSession);
+                        this.editor.setReadOnly(true);
+                        this.updateAnnotations();
+                    }
+                    delete this.sessions[file];
+
+                    for(let key in this.errors) {
+                        const message = this.errors[key];
+                        if(message.sourceLocation.file == file) {
+                            delete this.errors[key];
+                        }
+                    }
+                }
+            },
+            handleBrowserRefresh: function() {
+                for(let key in this.sessions) {
+                    delete this.sessions[key];
+                }
+
+                this.errors = undefined;
+                this.clear();
+                if(this.fileName) {
+                    this.load(this.fileName, true);
+                }
             }
         },
         mounted() {
@@ -218,6 +346,7 @@
             this.langTools.setCompleters([this.langTools.keyWordCompleter]);
 
             this.editor = ace.edit('editor' + this._uid);
+            this.defaultSession = this.editor.getSession();
             this.editor.getSession().setMode('ace/mode/solidity');
             this.editor.setTheme('ace/theme/tomorrow_night');
             this.editor.setOptions({
@@ -227,6 +356,7 @@
                 enableLiveAutocompletion: true,
                 fontFamily: "'Monospace', monospace"
             });
+            this.editor.setReadOnly(true);
 
             this.fontSize = localStorage['font-size'] ? parseInt(localStorage['font-size']) : 14;
             this.editor.setFontSize(this.fontSize);
@@ -236,14 +366,18 @@
             GlobalEvent.$on('deploy', this.compileAndDeploy);
             GlobalEvent.$on('resizeEditor', this.handleResize);
             GlobalEvent.$on('fontSize', this.handleFontSize);
-
-            this.load(this.fileName);  // TODO handle multiple files
+            GlobalEvent.$on('fileSelected', this.load);
+            GlobalEvent.$on('fileDeleted', this.handleFileDelete);
+            GlobalEvent.$on('browserRefresh', this.handleBrowserRefresh);
         },
         beforeDestroy() {
             GlobalEvent.$off('compile', this.compile);
             GlobalEvent.$off('deploy', this.compileAndDeploy);
             GlobalEvent.$off('resizeEditor', this.handleResize);
             GlobalEvent.$off('fontSize', this.handleFontSize);
+            GlobalEvent.$off('fileSelected', this.load);
+            GlobalEvent.$off('fileDeleted', this.handleFileDelete);
+            GlobalEvent.$off('browserRefresh', this.handleBrowserRefresh);
             this.editor.destroy();
         }
     }
