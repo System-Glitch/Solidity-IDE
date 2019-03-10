@@ -143,7 +143,18 @@
             calculatePosition: function(element) {
                 const left = element.getBoundingClientRect().left;
                 return (-left) + 'px';
+            },
+            handleBrowserRefresh: function() {
+                if(this.directory) {
+                    this.open = false;
+                }
             }
+        },
+        mounted() {
+            GlobalEvent.$on('browserRefresh', this.handleBrowserRefresh);
+        },
+        beforeDestroy() {
+            GlobalEvent.$off('browserRefresh', this.handleBrowserRefresh);
         }
     }
 </script>
