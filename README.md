@@ -14,6 +14,7 @@ This IDE is web-based but works with the file system. You can open and use any d
 **Option 2:** Clone the repository and run `npm install`. On windows, you may need to install the [build tools](https://github.com/felixrieseberg/windows-build-tools) using: `npm install --global windows-build-tools`. Then build for a local usage and run:  
 
 ```
+npm install
 npm run build-local
 npm run ide
 ```
@@ -84,6 +85,13 @@ npm run server
 # Run vue.js server
 npm run serve
 ```
+
+## Donations
+
+I'm working on this project in my free time. Donating would greatly help me. I'm extremely grateful to all donators.
+
+**BTC**: bc1q9kphcsrqz595h9mu09rd3gumjug5ud7anksh2w  
+**ETH**: 0x93115bc1Ca07a3705e5a039D4509668629154D6C
 
 ## TODO
 
