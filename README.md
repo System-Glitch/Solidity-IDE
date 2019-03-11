@@ -88,7 +88,7 @@ npm run serve
 
 ## Donations
 
-I'm working on this project in my free time. Donating would greatly help me. I'm extremely grateful to all donators.
+I'm working on this project in my free time. I would be extremely grateful if you decide to support me on this project.
 
 **BTC**: bc1q9kphcsrqz595h9mu09rd3gumjug5ud7anksh2w  
 **ETH**: 0x93115bc1Ca07a3705e5a039D4509668629154D6C
