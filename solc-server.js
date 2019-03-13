@@ -60,6 +60,7 @@ app.get('/compile', function (req, res) {
     // Save built files?
 
     res.end(output.replace(new RegExp(directory, 'g'), ''))
+    console.log('Compile')
 })
 
 //------------------------------------
@@ -77,6 +78,10 @@ app.get('/directory', function(req, res) {
 
             if(!directory.endsWith('/'))
                 directory += '/'
+
+            if(process.platform == 'win32') {
+                directory = directory.replace(/\//g, FILE_SEPARATOR)
+            }
         }
 
         if(req.query.dir) {
@@ -86,15 +91,23 @@ app.get('/directory', function(req, res) {
                 return
             }
 
-            if(!req.query.dir.endsWith('/'))
+            if(!req.query.dir.endsWith('/')) {
                 req.query.dir += '/'
+            }
+
+            if(process.platform == 'win32') {
+                req.query.dir = req.query.dir.replace(/\//g, FILE_SEPARATOR)
+            }
         }
 
-        const result = listDir(req.query.dir ? req.query.dir : '')
+        const path = req.query.dir ? req.query.dir : ''
+        const result = listDir(path)
         res.end(JSON.stringify(result))
+        console.log('List directory content: ' + path)
     } catch(error) {
         res.status(403)
         res.end(error.message)
+        console.log('Couldn\'t list directory content: ' + file)
     }
 })
 
@@ -108,9 +121,11 @@ app.get('/file', function(req, res) {
         if (validateFile(file, res)) {
             try {
                 res.end(fs.readFileSync(file).toString())
+                console.log('Fetch file: ' + file)
             } catch(error) {
                 res.status(403)
                 res.end(error.message)
+                console.log('Couldn\'t fetch file: ' + file)
             }
         }
     } else {
@@ -148,9 +163,11 @@ app.post('/create', function(req, res) {
             fs.writeFileSync(path, '')
             res.status(201)
             res.end()
+            console.log('Create file: ' + path)
         } catch(error) {
             res.status(403)
             res.end(error.message)
+            console.log('Couldn\'t create file: ' + file)
         }
     } else {
         res.status(400)
@@ -181,9 +198,11 @@ app.put('/save', function(req, res) {
             fs.writeFileSync(file, req.body.content)
             res.status(204)
             res.end()
+            console.log('Save file: ' + file)
         } catch(error) {
             res.status(403)
             res.end(error.message)
+            console.log('Couldn\'t save file: ' + error.message)
         }
 
     } else {
@@ -205,9 +224,11 @@ app.delete('/delete', function(req, res) {
                 fs.unlinkSync(file)
                 res.status(204)
                 res.end()
+                console.log('Delete file: ' + file)
             } catch(error) {
                 res.status(403)
                 res.end(error.message)
+                console.log('Couldn\'t delete file: ' + error.message)
             }
         }
 

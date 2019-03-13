@@ -1,6 +1,6 @@
 {
   "name": "solidity-ide",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": true,
   "description": "A light and easy IDE for Solidity smart contract development.",
   "author": "SystemGlitch",
@@ -26,14 +26,14 @@
     "express": "^4.16.4",
     "ganache-cli": "^6.4.1",
     "minimist": "^1.2.0",
-    "solc": "^0.5.5"
+    "solc": "^0.5.6"
   },
   "devDependencies": {
-    "@vue/cli": "^3.5.0",
-    "@vue/cli-plugin-babel": "^3.5.0",
-    "@vue/cli-plugin-eslint": "^3.5.0",
-    "@vue/cli-service": "^3.5.0",
-    "@vue/cli-service-global": "^3.5.0",
+    "@vue/cli": "^3.5.1",
+    "@vue/cli-plugin-babel": "^3.5.1",
+    "@vue/cli-plugin-eslint": "^3.5.1",
+    "@vue/cli-service": "^3.5.1",
+    "@vue/cli-service-global": "^3.5.1",
     "ace-mode-solidity": "^0.1.1",
     "axios": "^0.18.0",
     "babel-eslint": "^10.0.1",
