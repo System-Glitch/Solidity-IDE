@@ -56,10 +56,16 @@ app.get('/compile', function (req, res) {
         }
     }
 
-    const output = solc.compile(JSON.stringify(input))
+    let output = solc.compile(JSON.stringify(input))
     // Save built files?
 
-    res.end(output.replace(new RegExp(directory, 'g'), ''))
+    output = output.replace(new RegExp(directory.replace(/\\/g, '\\\\'), 'g'), '')
+
+    if(process.platform == 'win32') {
+        output = output.replace(/\//g, FILE_SEPARATOR.repeat(2))
+    }
+
+    res.end(output)
     console.log('Compile')
 })
 
