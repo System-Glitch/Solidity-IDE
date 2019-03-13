@@ -3,15 +3,15 @@
 // -d: development mode. If set, open 'localhost:8080' in the browser, use the local build instead
 // --path=<PATH>: path to the default directory (optional, use working directory if missing)
 
-const argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2))
 for(let key in process.argv) {
     if(process.argv[key].startsWith('--path=')) {
-        process.argv.splice(key, 1);
-        break;
+        process.argv.splice(key, 1)
+        break
     }
 }
 
-const FILE_SEPARATOR = process.platform == 'win32'? '\\': '/'
+const FILE_SEPARATOR = process.platform == 'win32' ? '\\': '/'
 var directory = argv.path ? argv.path : process.cwd()
 const PORT = 8081
 const FORBIDDEN_CHARACTERS = "\\\\|<|>|:|\\\"|\\'|\\||\\?|\\*|~|#|\\n|\\t|\\v|\\f|\\r"
@@ -38,7 +38,7 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Methods", "OPTIONS, HEAD, GET, POST, PUT, DELETE")
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
     res.header("Content-Type", "application/json")
-    next();
+    next()
 })
 
 app.get('/compile', function (req, res) {
@@ -101,7 +101,10 @@ app.get('/directory', function(req, res) {
 // Fetch file
 app.get('/file', function(req, res) {
     if(req.query.file) {
-        const file = directory + req.query.file
+        let file = directory + req.query.file
+        if(process.platform == 'win32') {
+            file = file.replace(/\//g, FILE_SEPARATOR)
+        }
         if (validateFile(file, res)) {
             try {
                 res.end(fs.readFileSync(file).toString())
@@ -119,7 +122,11 @@ app.get('/file', function(req, res) {
 // Create file
 app.post('/create', function(req, res) {
     if(req.body.file) {
-        const path = directory + req.body.file
+        let path = directory + req.body.file
+        if(process.platform == 'win32') {
+            path = path.replace(/\//g, FILE_SEPARATOR)
+        }
+
         if (new RegExp(FORBIDDEN_CHARACTERS).test(req.body.file)) {
             res.status(400)
             res.end('Given file name contains forbidden characters.')
@@ -135,7 +142,9 @@ app.post('/create', function(req, res) {
         }
 
         try {
-            fs.mkdirSync(path.substring(0, path.lastIndexOf('/')), { recursive: true })
+            if(path.indexOf(FILE_SEPARATOR) != -1) {
+                fs.mkdirSync(path.substring(0, path.lastIndexOf(FILE_SEPARATOR)), { recursive: true })
+            }
             fs.writeFileSync(path, '')
             res.status(201)
             res.end()
@@ -151,9 +160,13 @@ app.post('/create', function(req, res) {
 
 // Save file
 app.put('/save', function(req, res) {
-    var file = ''
+    let file = ''
     if(req.body.file) {
         file = directory + req.body.file
+        if(process.platform == 'win32') {
+            file = file.replace(/\//g, FILE_SEPARATOR)
+        }
+
         if (!validateFile(file, res)) {
             return
         }
@@ -182,7 +195,11 @@ app.put('/save', function(req, res) {
 // Delete file
 app.delete('/delete', function(req, res) {
     if(req.body.file) {
-        const file = directory + req.body.file
+        let file = directory + req.body.file
+        if(process.platform == 'win32') {
+            file = file.replace(/\//g, FILE_SEPARATOR)
+        }
+
         if (validateFile(file, res)) {
             try {
                 fs.unlinkSync(file)
@@ -210,8 +227,9 @@ function listDir(dir) {
 
         try {
             const stats = fs.lstatSync(directory + dir + item)
-            if((stats.isFile() && !item.endsWith('.sol')) || (!stats.isFile() && !stats.isDirectory()))
-                continue; // Skip non-sol files and non-directories
+            if((stats.isFile() && !item.endsWith('.sol')) || (!stats.isFile() && !stats.isDirectory())) {
+                continue // Skip non-sol files and non-directories
+            }
             const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true}
             result.push(file)
             if(stats.isDirectory()) {
@@ -222,7 +240,7 @@ function listDir(dir) {
         }
     }
 
-    return result;
+    return result
 }
 
 function listDirForCompile(dir, result) {
@@ -246,12 +264,12 @@ function listDirForCompile(dir, result) {
         }
     }
 
-    return result;
+    return result
 }
 
 function validateFile(path, res) {
     try {
-        fs.accessSync(path, fs.constants.S_IFREG & fs.constants.R_OK);
+        fs.accessSync(path, fs.constants.S_IFREG & fs.constants.R_OK)
         if (!path.endsWith('.sol')) {
             res.status(400)
             res.end('Given file doesn\'t exist or is not a solidity file.')
@@ -285,10 +303,10 @@ app.listen(PORT, 'localhost', function () {
 setTimeout(function() {
     console.log("Starting ganache...")
     require('ganache-cli/cli')
-}, 1);
+}, 1)
 
 if(argv.d !== true) { // Not in dev mode
-    const url = 'file://' + __dirname + '/dist/index.html';
+    const url = 'file://' + __dirname + '/dist/index.html'
     const start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open')
     require('child_process').exec(start + ' ' + url)
 }
