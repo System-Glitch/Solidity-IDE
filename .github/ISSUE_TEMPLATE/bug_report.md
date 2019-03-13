@@ -6,9 +6,9 @@ about: Report a bug, improperly working feature or code
 
 ## Description
 
-**Branch:** [current branch]  
-**Commit:** [current commit hash]  
-**Environment:** [production|local[on host|VM(include VM details)|container(include container details)]]  
+**Branch:** [current branch or tag]  
+**Commit:** [current commit hash or tag]  
+**Environment:** [Operating system, node version, browser]  
 **Reproduces:** [always|sometimes|once|every second time|...]  
 
 Describe your issue.
