@@ -5,7 +5,7 @@
             {{ directory.name }}
         </span>
         <b-list-group :class="open ? '' : 'd-none'">
-            <directory v-for="subdirectory in directories" v-bind:key="subdirectory.path" v-bind:files="subdirectory.childs" v-bind:directory="subdirectory" v-on:select="select" v-on:delete="onDelete"  v-bind:selected="selected" :ref="'directory_' + subdirectory.path"/>
+            <directory v-for="subdirectory in directories" v-bind:key="subdirectory.path" v-bind:files="subdirectory.childs" v-bind:directory="subdirectory" v-on:select="select" v-on:delete="onDelete" v-on:loaded="onLoaded" v-bind:selected="selected" :ref="'directory_' + subdirectory.path"/>
             <b-list-group-item
             v-for="file in childFiles" v-bind:key="file.name"
             class="pl-0 py-1 pr-2 d-flex file" v-bind:class="selected == file ? 'active' : ''"
@@ -76,6 +76,9 @@
             onDelete: function(file, files) {
                 this.$emit('delete', file, files ? files : this.files);
             },
+            onLoaded: function(directory) {
+                this.$emit('loaded', directory);
+            },
             clickDelete: function(file, event) {
                 this.onDelete(file);
 
@@ -90,6 +93,7 @@
                         .then(function(response) {
                             this.directory.childs = response.data;
                             this.updateSelectedIndicator();
+                            this.$emit('loaded', this);
 
                             if(callback) {
                                 callback(this.directory);

@@ -17,7 +17,7 @@
         </div>
         <div class="scrollable d-flex">
             <b-list-group v-if="files" class="w-100">
-                <directory v-bind:files="files" v-on:select="select" v-on:delete="onDelete" v-bind:selected="selected" ref="rootDirectory"/>
+                <directory v-bind:files="files" v-on:select="select" v-on:delete="onDelete" v-on:loaded="refreshFileState" v-bind:selected="selected" ref="rootDirectory"/>
             </b-list-group>
         </div>
         <b-modal
@@ -74,7 +74,8 @@
                 deletingFiles: null, // Used to know from which array to remove the deleted file
                 newFile: '',
                 files: [],
-                directory: ''
+                directory: '',
+                messages: undefined
             }
         },
         methods: {
@@ -110,7 +111,6 @@
                 });
             },
             updateSelection: function() {
-                // TODO load needed directories if selected is not in root
                 const file = this.selected != null ? this.findFile(this.files, this.selected.path) : null;
                 if(this.selected != file)
                     this.selected = file;
@@ -202,8 +202,12 @@
             },
             handleFileState: function(messages) {
                 this.resetStates(this.files);
-                for(let key in messages) {
-                    const message = messages[key];
+                this.messages = messages;
+                this.refreshFileState();
+            },
+            refreshFileState: function() {
+                for(let key in this.messages) {
+                    const message = this.messages[key];
                     const file = this.findFile(this.files, message.sourceLocation.file);
                     if(file != null) {
                         const newState = this.getStateFromSeverity(message.severity);
