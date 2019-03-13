@@ -22,7 +22,7 @@ document.onkeydown = function(e) {
 document.onwheel = function(e) {
     if(e.ctrlKey) {
         e.preventDefault();
-        Event.$emit('fontSize', e.deltaY < 0);
+        GlobalEvent.$emit('fontSize', e.deltaY < 0);
     }
 }
 
