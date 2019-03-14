@@ -71,9 +71,15 @@
                             this.editor.getSession().setMode('ace/mode/json');
                             this.setMessage(JSON.stringify(result, null, 4));
                         })
-                        .catch((error) => {
+                        .catch((result) => {
+                            let error;
+                            try {
+                                error = JSON.parse(result.message.replace("Node error: ", "")).message;
+                            } catch(err) {
+                                error = result.message;
+                            }
                             this.editor.getSession().setMode(null);
-                            this.setMessage(error.message);
+                            this.setMessage(error);
                         });
                     } else {
                         method.apply(null, params).send({value: data.amount, from: activeAccount.address, gas: 4700000})
