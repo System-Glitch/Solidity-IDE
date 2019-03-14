@@ -1,6 +1,6 @@
 {
   "name": "solidity-ide",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "private": true,
   "description": "A light and easy IDE for Solidity smart contract development.",
   "author": "SystemGlitch",

@@ -338,6 +338,12 @@
                 if(this.fileName) {
                     this.load(this.fileName, true);
                 }
+            },
+            handleDirectoryChange: function() {
+                this.fileName = '';
+                localStorage.removeItem('openFile');
+                this.editor.setSession(this.defaultSession);
+                this.editor.setReadOnly(true);
             }
         },
         mounted() {
@@ -368,7 +374,7 @@
             GlobalEvent.$on('fontSize', this.handleFontSize);
             GlobalEvent.$on('fileSelected', this.load);
             GlobalEvent.$on('fileDeleted', this.handleFileDelete);
-            GlobalEvent.$on('browserRefresh', this.handleBrowserRefresh);
+            GlobalEvent.$on('directoryChange', this.handleDirectoryChange);
         },
         beforeDestroy() {
             GlobalEvent.$off('compile', this.compile);
@@ -378,6 +384,7 @@
             GlobalEvent.$off('fileSelected', this.load);
             GlobalEvent.$off('fileDeleted', this.handleFileDelete);
             GlobalEvent.$off('browserRefresh', this.handleBrowserRefresh);
+            GlobalEvent.$off('directoryChange', this.handleDirectoryChange);
             this.editor.destroy();
         }
     }

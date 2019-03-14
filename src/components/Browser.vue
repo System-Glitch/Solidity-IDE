@@ -184,6 +184,8 @@
             },
             openDirectory: function() {
                 if(this.directory) {
+                    this.selected = null;
+                    GlobalEvent.$emit('directoryChange', this.directory);
                     this.updateFileList(this.directory);
                     this.directory = '';
                     this.$refs.browseModal.hide();
