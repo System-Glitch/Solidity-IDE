@@ -76,7 +76,7 @@
                             this.setMessage(error.message);
                         });
                     } else {
-                        method.apply(null, params).send({value: data.amount, from: activeAccount.address})
+                        method.apply(null, params).send({value: data.amount, from: activeAccount.address, gas: 4700000})
                         .then((result) => {
                             this.editor.getSession().setMode('ace/mode/json');
                             this.setMessage(JSON.stringify(result, null, 4));
