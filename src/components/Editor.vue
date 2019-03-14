@@ -3,10 +3,33 @@
         <div class="h-100" v-on:resize="handleResize">
             <div :id="'editor' + _uid" class="h-100 w-100"></div>
         </div>
+
+        <b-modal
+            ref="deployModal"
+            title="Deploy"
+            ok-title="Deploy"
+            v-on:ok="deployWithParams"
+            content-class="bg-transparent"
+            header-bg-variant="primary" header-text-variant="light"
+            body-bg-variant="dark" body-text-variant="light"
+            footer-bg-variant="dark" footer-text-variant="light"
+            ok-variant="success" cancel-variant="primary"
+        >
+            <p>
+                The following contracts have constructor parameters:
+            </p>
+            <constructor-parameter
+                v-for="contract in deployingContracts"
+                v-bind:key="contract.id"
+                v-bind:contract="contract"
+                :ref="'contractParams_' + contract.name + '_' + contract.id"
+            ></constructor-parameter>
+        </b-modal>
     </div>
 </template>
 
 <script>
+    import ConstructorParameter from '../components/ConstructorParameter.vue';
     const ace = require('brace');
     const Range = ace.acequire("ace/range").Range;
     require('ace-mode-solidity/build/remix-ide/mode-solidity');
@@ -15,6 +38,9 @@
 
     export default {
         name: "editor",
+        components: {
+            'constructor-parameter': ConstructorParameter
+        },
         data: function() {
             return {
                 editor: null,
@@ -24,7 +50,9 @@
                 fileName: '',
                 sessions: {},
                 errors: undefined,
-                defaultSession: null
+                defaultSession: null,
+                deployingContracts: [],
+                idIncrement: 0
             }
         },
         methods: {
@@ -45,9 +73,8 @@
                             GlobalEvent.$emit('message', {severity: 'success', formattedMessage: "Compilation successful."});
                         }
 
-                        if(callback == undefined || response.data.contracts == undefined) {
-                            GlobalEvent.$emit('processing', false);
-                        } else {
+                        GlobalEvent.$emit('processing', false);
+                        if(callback != undefined && response.data.contracts != undefined) {
                             callback(response.data.contracts);
                         }
                     }.bind(this))
@@ -57,7 +84,7 @@
                     });
                 });
             },
-            deploy: function(contractName, compiledContract) {
+            deploy: function(contractName, compiledContract, params) {
                 this.checkAbi(compiledContract.abi);
                 const contract = new window.web3.eth.Contract(compiledContract.abi);
                 const activeAccount = window.accountManager.getActiveAccount();
@@ -65,6 +92,7 @@
 
                 contract.deploy({
                     data: compiledContract.evm.bytecode.object,
+                    arguments: params,
                 }).send({
                     from: activeAccount.address,
                     gas: '4700000',
@@ -82,23 +110,71 @@
             },
             deployFile: function(file) {
                 for(let key in file) {
-                    this.deploy(key, file[key]);
+                    this.deploy(key, file[key], []);
+                }
+            },
+            deployWithParams: function() {
+                let successCount = 0;
+                GlobalEvent.$emit('processing', true);
+                for(let key in this.deployingContracts) {
+                    try {
+                        const contract = this.deployingContracts[key];
+                        const params = this.$refs['contractParams_' + contract.name + '_' + contract.id][0].value;
+                        this.deploy(contract.name, contract, JSON.parse(params));
+                        successCount++;
+                    } catch(error) {
+                        GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Deploy failed: " + error.message});
+                    }
+                }
+
+                if(successCount == 0) {
+                    GlobalEvent.$emit('processing', false);
                 }
             },
             compileAndDeploy: function() {
                 this.compile(function(files) {
+                    this.deployingContracts = [];
                     if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
-                        GlobalEvent.$emit('refreshAccounts', window.accountManager.selectedAccount, () => {
+                        GlobalEvent.$emit('refreshAccounts', 'all', () => {
                             for(let key in files) {
-                                this.deployFile(files[key]);
+                                for(let keyContract in files[key]) {
+                                    const contract = files[key][keyContract];
+                                    contract.name = keyContract;
+                                    contract.id = this.idIncrement++;
+                                    this.deployingContracts.push(contract);
+                                }
                             }
                         });
                     } else {
                         for(let key in files) {
-                            this.deployFile(files[key]);
+                            for(let keyContract in files[key]) {
+                                const contract = files[key][keyContract];
+                                contract.name = keyContract;
+                                contract.id = this.idIncrement++;
+                                this.deployingContracts.push(contract);
+                            }
                         }
                     }
+
+                    window.Vue.nextTick(function() {
+                        if(!this.checkConstructorParametersVisible()) {
+                            this.$refs.deployModal.hide();
+                            for(let key in files) {
+                                this.deployFile(files[key]);
+                            }
+                        } else {
+                            this.$refs.deployModal.show();
+                        }
+                    }.bind(this));
                 }.bind(this));
+            },
+            checkConstructorParametersVisible: function() {
+                for(let key in this.deployingContracts) {
+                    const contract = this.deployingContracts[key];
+                    if(this.$refs['contractParams_' + contract.name + '_' + contract.id][0].visible)
+                        return true;
+                }
+                return false;
             },
             clear: function() {
                 for(let key in this.sessions) {

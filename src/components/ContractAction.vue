@@ -1,24 +1,24 @@
 <template>
-            <div class="mb-2 mx-auto input-group">
-                <div class="col p-0" :class="method.payable !== true && !method.inputs.length ? '' : 'input-group-prepend'">
-                    <button class="btn btn-sm btn-block" v-bind:class="method.payable ? 'btn-info' : 'btn-secondary'" @click="run()" :title="method.name">{{ method.name }}</button>
-                </div>
-                <b-form-input class="col form-control-sm bg-light"
-                      type="text"
-                      required
-                      :placeholder="paramsPlaceholder"
-                      v-model="params"
-                      v-if="method.inputs.length"
-                      @keyup.enter.native="run()" />
-                <b-form-input class="col form-control-sm bg-light amount-select"
-                      type="number"
-                      required
-                      min="0"
-                      placeholder="Amount"
-                      v-model="amount"
-                      v-if="method.payable === true" />
-                <b-form-select v-if="method.payable === true" v-model="selectedOption" :options="options" class="col form-control-sm bg-light unit-select" />
-            </div>
+    <div class="mb-2 mx-auto input-group">
+        <div class="col p-0" :class="method.payable !== true && !method.inputs.length ? '' : 'input-group-prepend'">
+            <button class="btn btn-sm btn-block" v-bind:class="method.payable ? 'btn-info' : 'btn-secondary'" @click="run()" :title="method.name">{{ method.name }}</button>
+        </div>
+        <b-form-input class="col form-control-sm bg-light"
+              type="text"
+              required
+              :placeholder="paramsPlaceholder"
+              v-model="params"
+              v-if="method.inputs.length"
+              @keyup.enter.native="run()" />
+        <b-form-input class="col form-control-sm bg-light amount-select"
+              type="number"
+              required
+              min="0"
+              placeholder="Amount"
+              v-model="amount"
+              v-if="method.payable === true" />
+        <b-form-select v-if="method.payable === true" v-model="selectedOption" :options="options" class="col form-control-sm bg-light unit-select" />
+    </div>
 </template>
 
 <script>
