@@ -88,6 +88,8 @@ app.get('/directory', function(req, res) {
             if(process.platform == 'win32') {
                 directory = directory.replace(/\//g, FILE_SEPARATOR)
             }
+
+            console.log('Change root directory: ' + directory)
         }
 
         if(req.query.dir) {
@@ -109,7 +111,7 @@ app.get('/directory', function(req, res) {
         const path = req.query.dir ? req.query.dir : ''
         const result = listDir(path)
         res.end(JSON.stringify(result))
-        console.log('List directory content: ' + path)
+        console.log('List directory content: ' + (path.length ? path : './'))
     } catch(error) {
         res.status(403)
         res.end(error.message)
@@ -333,7 +335,7 @@ setTimeout(function() {
 }, 1)
 
 if(argv.d !== true) { // Not in dev mode
-    const url = 'file://' + __dirname + '/dist/index.html'
+    const url = '"file://' + __dirname + '/dist/index.html"'
     const start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open')
     require('child_process').exec(start + ' ' + url)
 }
