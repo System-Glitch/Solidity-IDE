@@ -67,7 +67,7 @@ If the list is empty, this is probably because the IDE opened before the server 
 At the bottom right of the screen is the messages panel. This panel displays errors and warnings.
 
 Clicking "_compile_" will save all changes. Pressing _CTRL+S_ has the same behavior.  
-Clicking "_deploy_" will recompile everything and deploy all contracts in your project's folder on the local ganache host.
+Clicking "_deploy_" will recompile everything and deploy all contracts in the currently open `.sol` file on the local ganache host.
 
 <p align="center"><img src=".github/messages.png" alt="Messages panel"></p>
 
