@@ -41,6 +41,7 @@
             title="Open..."
             ok-title="Open"
             v-on:ok="openDirectory"
+            v-on:shown="$refs.browseInput.focus()"
             lazy
             content-class="bg-transparent"
             header-bg-variant="primary" header-text-variant="light"
@@ -52,7 +53,7 @@
               label="Enter the path of the folder you want to open"
               label-for="browseInput"
             >
-                <b-form-input id="browseInput" v-model="directory" trim placeholder="Path..." @keyup.enter.native="openDirectory"/>
+                <b-form-input id="browseInput" ref="browseInput" v-model="directory" trim placeholder="Path..." @keyup.enter.native="openDirectory"/>
             </b-form-group>
         </b-modal>
     </div>
