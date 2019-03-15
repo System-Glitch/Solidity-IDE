@@ -89,9 +89,15 @@
                             GlobalEvent.$emit('refreshAccounts', "all");
                         })
                         .catch((result) => {
-                            const error = JSON.parse(result.message.replace("Node error: ", ""));
+                            let error;
+                            const message = result.message.replace("Node error: ", "");
+                            try {
+                                error = JSON.parse(message).message;
+                            } catch(err) {
+                                error = message;
+                            }
                             this.editor.getSession().setMode(null);
-                            this.setMessage(error.message);
+                            this.setMessage(error);
                             GlobalEvent.$emit('refreshAccounts', "all");
                         });
                     }
