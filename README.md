@@ -51,6 +51,7 @@ To get started, I recommend creating a new folder for your project. Once done, r
 
 <p align="center"><img src=".github/open.png" alt="File browser"></p>
 
+Only `.sol` files and directories are shown in the browser.  
 The next step is to create a file using the file browser. You can create files inside subdirectories (missing directories will be created) by writing the path with `/` separators. If you omit the `.sol` at the end of the filename, the IDE will add it automatically. You can start coding!
 
 #### Account management

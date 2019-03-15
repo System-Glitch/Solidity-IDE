@@ -417,6 +417,7 @@
             handleDirectoryChange: function() {
                 this.fileName = null;
                 localStorage.removeItem('openFile');
+                this.sessions = {};
                 this.editor.setSession(this.defaultSession);
                 this.editor.setReadOnly(true);
             }
