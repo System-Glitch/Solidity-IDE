@@ -133,39 +133,37 @@
             },
             compileAndDeploy: function() {
                 this.compile(function(files) {
-                    this.deployingContracts = [];
-                    if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
-                        GlobalEvent.$emit('refreshAccounts', 'all', () => {
-                            for(let key in files) {
-                                for(let keyContract in files[key]) {
-                                    const contract = files[key][keyContract];
+                    if(this.fileName) {
+                        this.deployingContracts = [];
+                        if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
+                            GlobalEvent.$emit('refreshAccounts', 'all', () => {
+                                const file = files[this.fileName];
+                                for(let keyContract in file) {
+                                    const contract = file[keyContract];
                                     contract.name = keyContract;
                                     contract.id = this.idIncrement++;
                                     this.deployingContracts.push(contract);
                                 }
-                            }
-                        });
-                    } else {
-                        for(let key in files) {
-                            for(let keyContract in files[key]) {
-                                const contract = files[key][keyContract];
+                            });
+                        } else {
+                            const file = files[this.fileName];
+                            for(let keyContract in file) {
+                                const contract = file[keyContract];
                                 contract.name = keyContract;
                                 contract.id = this.idIncrement++;
                                 this.deployingContracts.push(contract);
                             }
                         }
-                    }
 
-                    window.Vue.nextTick(function() {
-                        if(!this.checkConstructorParametersVisible()) {
-                            this.$refs.deployModal.hide();
-                            for(let key in files) {
-                                this.deployFile(files[key]);
+                        window.Vue.nextTick(function() {
+                            if(!this.checkConstructorParametersVisible()) {
+                                this.$refs.deployModal.hide();
+                                this.deployFile(files[this.fileName]);
+                            } else {
+                                this.$refs.deployModal.show();
                             }
-                        } else {
-                            this.$refs.deployModal.show();
-                        }
-                    }.bind(this));
+                        }.bind(this));
+                    }
                 }.bind(this));
             },
             checkConstructorParametersVisible: function() {
@@ -390,6 +388,7 @@
             handleFileDelete: function(file) {
                 if(this.sessions[file] != undefined) {
                     if(file == this.fileName) {
+                        this.fileName = null;
                         this.editor.setSession(this.defaultSession);
                         this.editor.setReadOnly(true);
                         this.updateAnnotations();
@@ -416,7 +415,7 @@
                 }
             },
             handleDirectoryChange: function() {
-                this.fileName = '';
+                this.fileName = null;
                 localStorage.removeItem('openFile');
                 this.editor.setSession(this.defaultSession);
                 this.editor.setReadOnly(true);
