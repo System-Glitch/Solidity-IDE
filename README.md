@@ -10,8 +10,16 @@ This IDE is web-based but works with the file system. You can open and use any d
 
 ## Install
 
-**Option 1:** Download the latest [release](https://github.com/System-Glitch/Solidity-IDE/releases) and run the IDE using: `npm run ide`.  
-**Option 2:** Clone the repository and run `npm install`. On windows, you may need to install the [build tools](https://github.com/felixrieseberg/windows-build-tools) using: `npm install --global windows-build-tools`. Then build for a local usage and run:  
+### Using a release
+
+Download the latest [release](https://github.com/System-Glitch/Solidity-IDE/releases) and run the IDE using:
+```
+npm run ide
+```
+
+### Build from source
+
+Clone the repository and run `npm install`. On windows, you may need to install the [build tools](https://github.com/felixrieseberg/windows-build-tools) using: `npm install --global windows-build-tools`. Then build for a local usage using:  
 
 ```
 npm install
@@ -19,7 +27,9 @@ npm run build-local
 npm run ide
 ```
 
-The second command will run ganache and the solc server in the background, don't kill this process when using the IDE.  
+The third command will run ganache and the solc server in the background, don't kill this process when using the IDE.  
+
+---
 
 `npm run ide` accepts a path as parameter for the default directory:
 ```
