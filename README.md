@@ -73,7 +73,7 @@ Clicking "_deploy_" will recompile everything and deploy all contracts in your p
 A new panel will appear at the bottom of the screen. Each tab represents an instance of your contracts. You can test the contracts methods by clicking the action buttons.
 
 Grey buttons are `pure`  or `view` functions.  
-Cyan buttons are `payable` functions. You can specifiy an amount to send to the contract using the inputs next to the button. The given amount will be **withdrawn from the selected account** in the accounts panel.  
+Cyan buttons are functions requiring a transaction. You can specifiy an amount to send to the contract using the inputs next to the button. The given amount will be **withdrawn from the selected account** in the accounts panel.  
 When a functions requires parameters, an aditionnal input is available. Data is written using the **JSON format** and parameters are **comma-separated**. (Strings must be surrounded by quotes for example)
 
 The result of the call will be displayed in the text area next to the action buttons.

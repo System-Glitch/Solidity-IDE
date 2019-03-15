@@ -1,7 +1,7 @@
 <template>
     <div class="mb-2 mx-auto input-group">
         <div class="col p-0" :class="method.payable !== true && !method.inputs.length ? '' : 'input-group-prepend'">
-            <button class="btn btn-sm btn-block" v-bind:class="method.payable ? 'btn-info' : 'btn-secondary'" @click="run()" :title="method.name">{{ method.name }}</button>
+            <button class="btn btn-sm btn-block" v-bind:class="method.stateMutability != 'view' && method.stateMutability != 'pure' ? 'btn-info' : 'btn-secondary'" @click="run()" :title="method.name">{{ method.name }}</button>
         </div>
         <b-form-input class="col form-control-sm bg-light"
               type="text"
