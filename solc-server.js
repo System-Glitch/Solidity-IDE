@@ -59,7 +59,7 @@ app.get('/compile', function (req, res) {
     let output = solc.compile(JSON.stringify(input))
     // Save built files?
 
-    output = output.replace(new RegExp(directory.replace(/\\/g, '\\\\'), 'g'), '')
+    output = output.replace(new RegExp(directory.replace(/\\/g, '\\\\\\\\').replace(/\./g, '\\.'), 'g'), '')
 
     if(process.platform == 'win32') {
         output = output.replace(/\//g, FILE_SEPARATOR.repeat(2))
