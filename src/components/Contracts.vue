@@ -65,13 +65,22 @@
             },
             printDuplicateNumber: function(number) {
                 return number > 0 ? ' (' + number + ')' : '';
+            },
+            onHostChanged: function() {
+                this.contracts = [];
+                this.contractsCounters = {};
+                setTimeout(() => {
+                    GlobalEvent.$emit('resizeEditor');
+                }, 0);
             }
         },
         mounted() {
             GlobalEvent.$on('contract', this.onContractCreated);
+            GlobalEvent.$on('ganacheHostChanged', this.onHostChanged);
         },
         beforeDestroy() {
             GlobalEvent.$off('contract', this.onContractCreated);
+            GlobalEvent.$off('ganacheHostChanged', this.onHostChanged);
         }
     }
 </script>

@@ -15,7 +15,8 @@ Vue.config.productionTip = false
 window.GlobalEvent = new Vue;
 
 const Web3 = require('web3');
-window.web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+window.Web3 = Web3;
+window.web3 = new Web3(new Web3.providers.HttpProvider(localStorage['ganache-host'] || 'http://localhost:8545'));
 
 window.axios = require('axios');
 

@@ -41,6 +41,11 @@ You can pass ganache-cli parameters as well:
 npm run ide -- --path=path/to/project -a 20 # Generate 20 accounts on startup
 ```
 
+If you don't want to run a new ganache in the background (for example to use your own), use:
+```
+npm run ide -- --noganache
+```
+
 If you get an error like "_Couldn't fetch..._" on startup, this is probably because the IDE opened before the server finished loading. Just click "_refresh_" and you should be good to go.
 
 ### Getting started
@@ -60,7 +65,9 @@ At the top right of the screen is the accounts panel. This panel allows you to m
 
 <p align="center"><img src=".github/accounts.png" alt="Accounts panel"></p>
 
-If the list is empty, this is probably because the IDE opened before the server finished loading. Just click "_refresh_".
+If the list is empty, this is probably because the IDE opened before the server finished loading. Just click "_refresh_".  
+
+You can choose another Ganache host if you want, by clicking the "_Change Ganache host_" button.  
 
 #### Compile, deploy and test
 

@@ -329,10 +329,12 @@ app.listen(PORT, 'localhost', function () {
     console.log('Started solc server. Listening on localhost:' + PORT + ', directory "' + directory + '"')
 })
 
-setTimeout(function() {
-    console.log("Starting ganache...")
-    require('ganache-cli/cli')
-}, 1)
+if(argv.noganache !== true) {
+    setTimeout(function() {
+        console.log("Starting ganache...")
+        require('ganache-cli/cli')
+    }, 1)
+}
 
 if(argv.d !== true) { // Not in dev mode
     const url = '"file://' + __dirname + '/dist/index.html"'

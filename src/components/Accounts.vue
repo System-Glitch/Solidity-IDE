@@ -3,6 +3,7 @@
         <div class="p-2 d-flex flex-horizontal justify-content-between align-items-center flex-shrink-0">
             <h5 class="m-0 d-inline-block">Accounts</h5>
             <div>
+                <button class="btn btn-primary btn-sm mr-1" @click="$refs.hostModal.show()" title="Change Ganache host"><i class="icon host"></i></button>
                 <button class="btn btn-primary btn-sm" @click="updateAccounts()" title="Refresh"><i class="icon refresh"></i></button>
             </div>
         </div>
@@ -35,6 +36,27 @@
                 </tbody>
             </table>
         </div>
+
+        <b-modal
+            ref="hostModal"
+            title="Change Ganache host"
+            ok-title="Change"
+            v-on:ok="changeHost"
+            v-on:shown="$refs.hostInput.focus()"
+            lazy
+            content-class="bg-transparent"
+            header-bg-variant="primary" header-text-variant="light"
+            body-bg-variant="dark" body-text-variant="light"
+            footer-bg-variant="dark" footer-text-variant="light"
+            ok-variant="success" cancel-variant="primary" :ok-disabled="!hostValid"
+        >
+            <b-form-group
+              label="Enter the URL of the Ganache host you want to use"
+              label-for="hostInput"
+            >
+                <b-form-input id="hostInput" ref="hostInput" v-model="host" trim placeholder="Host... (http://localhost:8585)" @keyup.enter.native="changeHost"/>
+            </b-form-group>
+        </b-modal>
     </div>
 </template>
 
@@ -43,7 +65,13 @@
         name: "accounts",
         data: function() {
             return {
-                accountManager: window.accountManager
+                accountManager: window.accountManager,
+                host: localStorage['ganache-host'] || 'http://localhost:8545'
+            }
+        },
+        computed: {
+            hostValid: function() {
+                return this.host.match(/http(s)?:\/\/(.+)/g) != null;
             }
         },
         methods: {
@@ -90,6 +118,15 @@
                 .catch((error) => {
                     GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Couldn't fetch account " + account + ": " + error.message});
                 });
+            },
+            changeHost: function() {
+                window.web3 = new window.Web3(new window.Web3.providers.HttpProvider(this.host));
+                window.accountManager.accounts = [];
+                localStorage.setItem('ganache-host', this.host);
+                this.updateAccounts();
+                GlobalEvent.$emit('clearMessages');
+                GlobalEvent.$emit('ganacheHostChanged');
+                this.$refs.hostModal.hide();
             }
         },
         mounted() {

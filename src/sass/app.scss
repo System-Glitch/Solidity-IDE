@@ -1,11 +1,8 @@
 
-// Fonts
 @import 'fonts';
-
-// Variables
 @import 'variables';
+@import 'icons';
 
-// Bootstrap
 @import '~bootstrap/scss/bootstrap';
 
 body, html {
@@ -248,35 +245,6 @@ body, html {
 
 .gutter-vertical:hover {
     cursor: row-resize;
-}
-
-.icon {
-    background-repeat: no-repeat;
-    padding-left: 16px;
-    padding-right: 0px;
-    background-position: center;
-}
-
-.icon.icon-pad {
-    background-position: 2px center;
-    padding-left: 19px;
-    padding-right: 6px;
-}
-
-.icon.directory {
-    background-image: url('~@/assets/icons/folder.png');
-}
-
-.icon.directory-open {
-    background-image: url('~@/assets/icons/folder_open.png');
-}
-
-.icon.file {
-    background-image: url('~@/assets/icons/file.png');
-}
-
-.icon.refresh {
-    background-image: url('~@/assets/icons/refresh.png');
 }
 
 .modal-body {
