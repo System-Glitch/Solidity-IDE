@@ -450,6 +450,7 @@
             GlobalEvent.$on('fontSize', this.handleFontSize);
             GlobalEvent.$on('fileSelected', this.load);
             GlobalEvent.$on('fileDeleted', this.handleFileDelete);
+            GlobalEvent.$on('browserRefresh', this.handleBrowserRefresh);
             GlobalEvent.$on('directoryChange', this.handleDirectoryChange);
         },
         beforeDestroy() {
