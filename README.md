@@ -10,6 +10,18 @@ This IDE is web-based but works with the file system. You can open and use any d
 
 ## Install
 
+### From NPM
+
+```
+npm install -g solidity-ide
+```
+On windows, you may need to install the [build tools](https://github.com/felixrieseberg/windows-build-tools) using: `npm install --global windows-build-tools`.  
+
+The, run the IDE using:
+```
+solidity-ide
+```
+
 ### Using a release
 
 Download the latest [release](https://github.com/System-Glitch/Solidity-IDE/releases) and run the IDE using:
