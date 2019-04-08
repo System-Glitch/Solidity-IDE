@@ -126,4 +126,3 @@ I'm working on this project in my free time. I would be extremely grateful if yo
 ## TODO
 
 - Dark-themed inputs
-- Config to select solc server host and ganache host

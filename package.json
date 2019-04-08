@@ -13,6 +13,13 @@
     "url": "https://github.com/System-Glitch/Solidity-IDE/issues"
   },
   "homepage": "https://github.com/System-Glitch/Solidity-IDE",
+  "keywords": [
+    "solidity",
+    "ide",
+    "ganache",
+    "ethereum",
+    "smart contract"
+  ],
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
