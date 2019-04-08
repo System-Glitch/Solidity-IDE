@@ -49,7 +49,6 @@
                 fontSize: 14,
                 content: [],
                 fileName: '',
-                fileBaseName: '',
                 sessions: {},
                 errors: undefined,
                 defaultSession: null,
@@ -131,19 +130,20 @@
             compileAndDeploy: function() {
                 this.compile(function(files) {
                     if(this.fileName) {
+                        const fileBaseName = path.basename(this.fileName, '.sol')
                         this.deployingContracts = [];
                         if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
                             GlobalEvent.$emit('refreshAccounts', 'all', () => {
-                                this.prepareContract(files);
+                                this.prepareContract(files, fileBaseName);
                             });
                         } else {
-                            this.prepareContract(files);    
+                            this.prepareContract(files, fileBaseName);    
                         }
 
                         window.Vue.nextTick(function() {
                             if(!this.checkConstructorParametersVisible()) {
                                 this.$refs.deployModal.hide();
-                                const file = files[this.fileBaseName];
+                                const file = files[fileBaseName];
                                 this.deploy(file.contract_name, file, []);
                             } else {
                                 this.$refs.deployModal.show();
@@ -152,9 +152,9 @@
                     }
                 }.bind(this));
             },
-            prepareContract: function(files) {
-                const contract = files[this.fileBaseName];
-                contract.name = this.fileBaseName
+            prepareContract: function(files, fileBaseName) {
+                const contract = files[fileBaseName];
+                contract.name = fileBaseName
                 contract.id = this.idIncrement++;
                 this.deployingContracts.push(contract)
             },
@@ -265,7 +265,6 @@
                                 GlobalEvent.$emit('fileChanged', file);
                             });
                             this.fileName = file;
-                            this.fileBaseName = path.basename(this.fileName, '.sol');
                             localStorage.setItem('openFile', file);
                             this.editor.setSession(this.sessions[file]);
                             this.editor.setReadOnly(false);

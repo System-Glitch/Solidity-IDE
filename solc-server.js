@@ -273,30 +273,6 @@ function listDir(dir) {
     return result
 }
 
-function listDirForCompile(dir, result) {
-    const items = fs.readdirSync(directory + dir)
-
-    for(let key in items) {
-        const item = items[key]
-        const path = directory + dir + item
-        const stats = fs.lstatSync(path)
-        if(stats.isFile() && item.endsWith('.sol')) { // Skip non-sol files and non-directories
-            try {
-                fs.accessSync(path, fs.constants.R_OK)
-                result[path] = { content: fs.readFileSync(path).toString() }
-            } catch(err) {
-                // Skip if no read permission
-            }
-        }
-
-        if(stats.isDirectory()) {
-            listDirForCompile(dir + item + '/', result)
-        }
-    }
-
-    return result
-}
-
 function validateFile(path, res) {
     try {
         fs.accessSync(path, fs.constants.S_IFREG & fs.constants.R_OK)

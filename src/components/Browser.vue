@@ -3,7 +3,7 @@
         <div class="p-2 d-flex flex-horizontal justify-content-between align-items-center flex-shrink-0">
             <h5 class="m-0 d-inline-block">Browser</h5>
             <div>
-                <button class="btn btn-primary btn-sm mr-1" @click="$refs.browseModal.show()" title="Open..."><i class="icon directory"></i></button>
+                <button style="display:none" class="btn btn-primary btn-sm mr-1" @click="$refs.browseModal.show()" title="Open..."><i class="icon directory"></i></button>
                 <button class="btn btn-primary btn-sm" @click="updateFileList()" title="Refresh"><i class="icon refresh"></i></button>
             </div>
         </div>
