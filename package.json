@@ -26,7 +26,7 @@
     "express": "^4.16.4",
     "ganache-cli": "^6.4.1",
     "minimist": "^1.2.0",
-    "solc": "^0.5.7"
+    "path": "^0.12.7"
   },
   "devDependencies": {
     "@vue/cli": "^3.5.3",

@@ -3,6 +3,9 @@
 // -d: development mode. If set, open 'localhost:8080' in the browser, use the local build instead
 // --path=<PATH>: path to the default directory (optional, use working directory if missing)
 
+const compile = require('../cli-commands/compiler/etherlime-compile');
+const Artifactor = require('../cli-commands/compiler/etherlime-artifactor');
+const Resolver = require('../cli-commands/compiler/etherlime-resolver');
 const argv = require('minimist')(process.argv.slice(2))
 for(let key in process.argv) {
     if(process.argv[key].startsWith('--path=')) {
@@ -16,7 +19,6 @@ var directory = argv.path ? argv.path : process.cwd()
 const PORT = 8081
 const FORBIDDEN_CHARACTERS = "\\\\|<|>|:|\\\"|\\'|\\||\\?|\\*|~|#|\\n|\\t|\\v|\\f|\\r"
 const fs = require('fs')
-const solc = require('solc')
 const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
@@ -41,31 +43,30 @@ app.use(function(req, res, next) {
     next()
 })
 
-app.get('/compile', function (req, res) {
-
-    const sources = listDirForCompile('', {})
-    const input = {
-        language: 'Solidity',
-        sources: sources,
-        settings: {
-            outputSelection: {
-                '*': {
-                    '*': [ '*' ]
-                }
+app.get('/compile', async function (req, res) {
+    const config = {
+        "contracts_directory": `${process.cwd()}/contracts`,
+        "working_directory": `${process.cwd()}`,
+        "contracts_build_directory": `${process.cwd()}/build`,
+        "artifactor": new Artifactor(`${process.cwd()}/build`),
+        "compilers": {
+            "solc": {
+                "version": undefined,
+                "docker": undefined
             }
-        }
-    }
+        },
+        "build_directory": `${process.cwd()}/build`,
+    };
+    config.resolver = new Resolver(config)
+    config.solc = {
+        optimizer: { enabled: false, runs: 200 },
+        evmVersion: "byzantium"
+    };
 
-    let output = solc.compile(JSON.stringify(input))
-    // Save built files?
+    let result = await compile.all(config)
+    result = JSON.stringify(result.returnVal)
 
-    output = output.replace(new RegExp(directory.replace(/\\/g, '\\\\\\\\').replace(/\./g, '\\.'), 'g'), '')
-
-    if(process.platform == 'win32') {
-        output = output.replace(/\//g, FILE_SEPARATOR.repeat(2))
-    }
-
-    res.end(output)
+    res.end(result)
     console.log('Compile')
 })
 

@@ -31,6 +31,7 @@
 <script>
     import ConstructorParameter from '../components/ConstructorParameter.vue';
     const ace = require('brace');
+    const path = require('path');
     const Range = ace.acequire("ace/range").Range;
     require('ace-mode-solidity/build/remix-ide/mode-solidity');
     require('brace/theme/tomorrow_night');
@@ -48,6 +49,7 @@
                 fontSize: 14,
                 content: [],
                 fileName: '',
+                fileBaseName: '',
                 sessions: {},
                 errors: undefined,
                 defaultSession: null,
@@ -74,8 +76,8 @@
                         }
 
                         GlobalEvent.$emit('processing', false);
-                        if(callback != undefined && response.data.contracts != undefined) {
-                            callback(response.data.contracts);
+                        if(callback != undefined && response.data != undefined) {
+                            callback(response.data);
                         }
                     }.bind(this))
                     .catch(function( error ) {
@@ -91,7 +93,7 @@
                 GlobalEvent.$emit('processing', true);
 
                 contract.deploy({
-                    data: compiledContract.evm.bytecode.object,
+                    data: compiledContract.bytecode,
                     arguments: params,
                 }).send({
                     from: activeAccount.address,
@@ -107,11 +109,6 @@
                     GlobalEvent.$emit('message', {severity: 'error', formattedMessage: "Deploy failed: " + error.message});
                     GlobalEvent.$emit('processing', false);
                 });
-            },
-            deployFile: function(file) {
-                for(let key in file) {
-                    this.deploy(key, file[key], []);
-                }
             },
             deployWithParams: function() {
                 let successCount = 0;
@@ -137,34 +134,29 @@
                         this.deployingContracts = [];
                         if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
                             GlobalEvent.$emit('refreshAccounts', 'all', () => {
-                                const file = files[this.fileName];
-                                for(let keyContract in file) {
-                                    const contract = file[keyContract];
-                                    contract.name = keyContract;
-                                    contract.id = this.idIncrement++;
-                                    this.deployingContracts.push(contract);
-                                }
+                                this.prepareContract(files);
                             });
                         } else {
-                            const file = files[this.fileName];
-                            for(let keyContract in file) {
-                                const contract = file[keyContract];
-                                contract.name = keyContract;
-                                contract.id = this.idIncrement++;
-                                this.deployingContracts.push(contract);
-                            }
+                            this.prepareContract(files);    
                         }
 
                         window.Vue.nextTick(function() {
                             if(!this.checkConstructorParametersVisible()) {
                                 this.$refs.deployModal.hide();
-                                this.deployFile(files[this.fileName]);
+                                const file = files[this.fileBaseName];
+                                this.deploy(file.contract_name, file, []);
                             } else {
                                 this.$refs.deployModal.show();
                             }
                         }.bind(this));
                     }
                 }.bind(this));
+            },
+            prepareContract: function(files) {
+                const contract = files[this.fileBaseName];
+                contract.name = this.fileBaseName
+                contract.id = this.idIncrement++;
+                this.deployingContracts.push(contract)
             },
             checkConstructorParametersVisible: function() {
                 for(let key in this.deployingContracts) {
@@ -273,6 +265,7 @@
                                 GlobalEvent.$emit('fileChanged', file);
                             });
                             this.fileName = file;
+                            this.fileBaseName = path.basename(this.fileName, '.sol');
                             localStorage.setItem('openFile', file);
                             this.editor.setSession(this.sessions[file]);
                             this.editor.setReadOnly(false);
