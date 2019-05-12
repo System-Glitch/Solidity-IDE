@@ -337,7 +337,7 @@ if(argv.noganache !== true) {
 }
 
 if(argv.d !== true) { // Not in dev mode
-    const url = '"file://' + __dirname + '/dist/index.html"'
+    let url = '"file://' + __dirname + '/dist/index.html"'
 
     if(process.platform == 'win32') url = '"" ' + url
 
