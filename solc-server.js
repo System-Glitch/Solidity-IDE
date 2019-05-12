@@ -338,6 +338,9 @@ if(argv.noganache !== true) {
 
 if(argv.d !== true) { // Not in dev mode
     const url = '"file://' + __dirname + '/dist/index.html"'
-    const start = (process.platform == 'darwin'? 'open': process.platform == 'win32'? 'start': 'xdg-open')
+
+    if(process.platform == 'win32') url = '"" ' + url
+
+    const start = (process.platform == 'darwin'? 'open': process.platform == 'win32' ? 'start': 'xdg-open')
     require('child_process').exec(start + ' ' + url)
 }

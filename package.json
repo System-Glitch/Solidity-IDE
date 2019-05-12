@@ -1,6 +1,6 @@
 {
   "name": "solidity-ide",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "private": false,
   "description": "A light and easy IDE for Solidity smart contract development.",
   "author": "SystemGlitch",
@@ -33,7 +33,7 @@
     "express": "^4.16.4",
     "ganache-cli": "^6.4.1",
     "minimist": "^1.2.0",
-    "solc": "^0.5.7"
+    "solc": "^0.5.8"
   },
   "devDependencies": {
     "@vue/cli": "^3.7.0",
