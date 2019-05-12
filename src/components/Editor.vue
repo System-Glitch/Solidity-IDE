@@ -137,32 +137,29 @@
                         this.deployingContracts = [];
                         if(window.accountManager.selectedAccount == -1) { // Fetch accounts if missing
                             GlobalEvent.$emit('refreshAccounts', 'all', () => {
-                                const file = files[this.fileName];
-                                for(let keyContract in file) {
-                                    const contract = file[keyContract];
-                                    contract.name = keyContract;
-                                    contract.id = this.idIncrement++;
-                                    this.deployingContracts.push(contract);
-                                }
+                                this.deployMultiple(files);
                             });
                         } else {
-                            const file = files[this.fileName];
-                            for(let keyContract in file) {
-                                const contract = file[keyContract];
-                                contract.name = keyContract;
-                                contract.id = this.idIncrement++;
-                                this.deployingContracts.push(contract);
-                            }
-                        }
+                            this.deployMultiple(files);
+                        }                        
+                    }
+                }.bind(this));
+            },
+            deployMultiple: function(files) {
+                const file = files[this.fileName];
+                for(let keyContract in file) {
+                    const contract = file[keyContract];
+                    contract.name = keyContract;
+                    contract.id = this.idIncrement++;
+                    this.deployingContracts.push(contract);
+                }
 
-                        window.Vue.nextTick(function() {
-                            if(!this.checkConstructorParametersVisible()) {
-                                this.$refs.deployModal.hide();
-                                this.deployFile(files[this.fileName]);
-                            } else {
-                                this.$refs.deployModal.show();
-                            }
-                        }.bind(this));
+                window.Vue.nextTick(function() {
+                    if(!this.checkConstructorParametersVisible()) {
+                        this.$refs.deployModal.hide();
+                        this.deployFile(files[this.fileName]);
+                    } else {
+                        this.$refs.deployModal.show();
                     }
                 }.bind(this));
             },
