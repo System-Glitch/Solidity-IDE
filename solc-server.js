@@ -68,18 +68,20 @@ app.get('/compile', function (req, res) {
 
     // Save built files
     const jsonOutput = JSON.parse(output)
-    if (!fs.existsSync(directory + 'build')) {
-        fs.mkdirSync(directory + 'build')
-    }
+    rmdir(directory + 'build')
 
     for(let file in jsonOutput.contracts) {
         const contract = jsonOutput.contracts[file]
 
         for(let contractName in contract) {
             const dir = directory + 'build' + FILE_SEPARATOR + file + FILE_SEPARATOR + contractName
-            fs.mkdirSync(dir, { recursive: true })
-            fs.writeFileSync(dir + FILE_SEPARATOR + contractName + '.bytecode', JSON.stringify(contract[contractName].evm.bytecode))
-            fs.writeFileSync(dir + FILE_SEPARATOR + contractName + '.abi', JSON.stringify(contract[contractName].abi))
+            try {
+                fs.mkdirSync(dir, { recursive: true })
+            } catch(err) {
+                fs.mkdirSync(dir, { recursive: true })
+            }
+            fs.writeFileSync(dir + FILE_SEPARATOR + contractName + '_bytecode.json', JSON.stringify(contract[contractName].evm.bytecode))
+            fs.writeFileSync(dir + FILE_SEPARATOR + contractName + '_abi.json', JSON.stringify(contract[contractName].abi))
         }
     }
 
@@ -341,6 +343,25 @@ function validateFile(path, res) {
 
 function validateSolidityFile(path) {
     return path.endsWith('.sol') && path.substring(path.lastIndexOf('/') + 1) != '.sol'
+}
+
+function rmdir(path) {
+    // Doesn't work properly on windows if
+    let files = [];
+    while(fs.existsSync(path)) {
+        files = fs.readdirSync(path)
+        for(let key in files) {
+            const curPath = path + FILE_SEPARATOR + files[key]
+            if(fs.lstatSync(curPath).isDirectory()) {
+                rmdir(curPath)
+            } else {
+                fs.unlinkSync(curPath)
+            }
+        }
+        try {
+            fs.rmdirSync(path)
+        } catch(err) { /* try again if failed (windows patch) */ }
+    }
 }
 
 // TODO Create directory without creating file

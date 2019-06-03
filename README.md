@@ -100,6 +100,8 @@ The result of the call will be displayed in the text area next to the action but
 
 <p align="center"><img src=".github/actions.png" alt="Contracts panel"></p>
 
+**You can find the ABI and bytecode (JSON format) in the `build` folder**, which is generated when you compile.
+
 ## For contributors
 
 If you want to contribute to this project, fork, install the dependencies and run the development tools. On windows, you may need to install the [build tools](https://github.com/felixrieseberg/windows-build-tools) using: `npm install --global windows-build-tools`  
