@@ -275,7 +275,7 @@ function listDir(dir) {
             if((stats.isFile() && !item.endsWith('.sol')) || (!stats.isFile() && !stats.isDirectory())) {
                 continue // Skip non-sol files and non-directories
             }
-            const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true}
+            const file = {name: item, path: (dir + item).replace(/\\/g, '/'), directory: stats.isDirectory(), state: 0, saved: true}
             result.push(file)
             if(stats.isDirectory()) {
                 file.childs = []
