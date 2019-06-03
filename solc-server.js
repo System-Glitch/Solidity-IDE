@@ -21,6 +21,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 
+const ignored = ['build', 'node_modules']
+
 console.log("Starting solc server...")
 
 if(!directory.endsWith(FILE_SEPARATOR))
@@ -304,12 +306,21 @@ function listDirForCompile(dir, result) {
             }
         }
 
-        if(stats.isDirectory() && !item.endsWith('build')) {
+        if(stats.isDirectory() && checkNotIgnored(item)) {
             listDirForCompile(dir + item + '/', result)
         }
     }
 
     return result
+}
+
+function checkNotIgnored(dir) {
+    for(let key in ignored) {
+        if(dir.endsWith(ignored)) {
+            return false
+        }
+    }
+    return true
 }
 
 function validateFile(path, res) {
