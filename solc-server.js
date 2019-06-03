@@ -346,7 +346,6 @@ function validateSolidityFile(path) {
 }
 
 function rmdir(path) {
-    // Doesn't work properly on windows if
     let files = [];
     while(fs.existsSync(path)) {
         files = fs.readdirSync(path)
