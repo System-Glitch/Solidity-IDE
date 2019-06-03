@@ -57,12 +57,28 @@ app.get('/compile', function (req, res) {
     }
 
     let output = solc.compile(JSON.stringify(input))
-    // Save built files?
 
     output = output.replace(new RegExp(directory.replace(/\\/g, '\\\\\\\\').replace(/\./g, '\\.'), 'g'), '')
 
     if(process.platform == 'win32') {
         output = output.replace(/\//g, FILE_SEPARATOR.repeat(2))
+    }
+
+    // Save built files
+    const jsonOutput = JSON.parse(output)
+    if (!fs.existsSync(directory + 'build')) {
+        fs.mkdirSync(directory + 'build')
+    }
+
+    for(let file in jsonOutput.contracts) {
+        const contract = jsonOutput.contracts[file]
+
+        for(let contractName in contract) {
+            const dir = directory + 'build' + FILE_SEPARATOR + file + FILE_SEPARATOR + contractName
+            fs.mkdirSync(dir, { recursive: true })
+            fs.writeFileSync(dir + FILE_SEPARATOR + contractName + '.bytecode', JSON.stringify(contract[contractName].evm.bytecode))
+            fs.writeFileSync(dir + FILE_SEPARATOR + contractName + '.abi', JSON.stringify(contract[contractName].abi))
+        }
     }
 
     res.end(output)
@@ -288,7 +304,7 @@ function listDirForCompile(dir, result) {
             }
         }
 
-        if(stats.isDirectory()) {
+        if(stats.isDirectory() && !item.endsWith('build')) {
             listDirForCompile(dir + item + '/', result)
         }
     }
