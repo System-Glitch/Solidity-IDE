@@ -1,6 +1,6 @@
 {
   "name": "solidity-ide",
-  "version": "2.2.4",
+  "version": "2.3.0",
   "private": false,
   "description": "A light and easy IDE for Solidity smart contract development.",
   "author": "SystemGlitch",
@@ -56,7 +56,7 @@
     "split.js": "^1.5.10",
     "vue": "^2.6.10",
     "vue-template-compiler": "^2.6.10",
-    "web3": "1.0.0-beta.46",
+    "web3": "^1.0.0-beta.55",
     "webpack": "^4.29.6"
   },
   "eslintConfig": {

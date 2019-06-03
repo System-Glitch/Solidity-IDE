@@ -21,6 +21,8 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 
+const ignored = ['build', 'node_modules']
+
 console.log("Starting solc server...")
 
 if(!directory.endsWith(FILE_SEPARATOR))
@@ -57,12 +59,30 @@ app.get('/compile', function (req, res) {
     }
 
     let output = solc.compile(JSON.stringify(input))
-    // Save built files?
 
     output = output.replace(new RegExp(directory.replace(/\\/g, '\\\\\\\\').replace(/\./g, '\\.'), 'g'), '')
 
     if(process.platform == 'win32') {
         output = output.replace(/\//g, FILE_SEPARATOR.repeat(2))
+    }
+
+    // Save built files
+    const jsonOutput = JSON.parse(output)
+    rmdir(directory + 'build')
+
+    for(let file in jsonOutput.contracts) {
+        const contract = jsonOutput.contracts[file]
+
+        for(let contractName in contract) {
+            const dir = directory + 'build' + FILE_SEPARATOR + file + FILE_SEPARATOR + contractName
+            try {
+                fs.mkdirSync(dir, { recursive: true })
+            } catch(err) {
+                fs.mkdirSync(dir, { recursive: true })
+            }
+            fs.writeFileSync(dir + FILE_SEPARATOR + contractName + '_bytecode.json', JSON.stringify(contract[contractName].evm.bytecode))
+            fs.writeFileSync(dir + FILE_SEPARATOR + contractName + '_abi.json', JSON.stringify(contract[contractName].abi))
+        }
     }
 
     res.end(output)
@@ -259,7 +279,7 @@ function listDir(dir) {
             if((stats.isFile() && !item.endsWith('.sol')) || (!stats.isFile() && !stats.isDirectory())) {
                 continue // Skip non-sol files and non-directories
             }
-            const file = {name: item, path: dir + item, directory: stats.isDirectory(), state: 0, saved: true}
+            const file = {name: item, path: (dir + item).replace(/\\/g, '/'), directory: stats.isDirectory(), state: 0, saved: true}
             result.push(file)
             if(stats.isDirectory()) {
                 file.childs = []
@@ -288,12 +308,21 @@ function listDirForCompile(dir, result) {
             }
         }
 
-        if(stats.isDirectory()) {
+        if(stats.isDirectory() && checkNotIgnored(item)) {
             listDirForCompile(dir + item + '/', result)
         }
     }
 
     return result
+}
+
+function checkNotIgnored(dir) {
+    for(let key in ignored) {
+        if(dir.endsWith(ignored)) {
+            return false
+        }
+    }
+    return true
 }
 
 function validateFile(path, res) {
@@ -314,6 +343,25 @@ function validateFile(path, res) {
 
 function validateSolidityFile(path) {
     return path.endsWith('.sol') && path.substring(path.lastIndexOf('/') + 1) != '.sol'
+}
+
+function rmdir(path) {
+    // Doesn't work properly on windows if
+    let files = [];
+    while(fs.existsSync(path)) {
+        files = fs.readdirSync(path)
+        for(let key in files) {
+            const curPath = path + FILE_SEPARATOR + files[key]
+            if(fs.lstatSync(curPath).isDirectory()) {
+                rmdir(curPath)
+            } else {
+                fs.unlinkSync(curPath)
+            }
+        }
+        try {
+            fs.rmdirSync(path)
+        } catch(err) { /* try again if failed (windows patch) */ }
+    }
 }
 
 // TODO Create directory without creating file

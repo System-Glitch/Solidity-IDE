@@ -86,13 +86,13 @@
             },
             deploy: function(contractName, compiledContract, params) {
                 this.checkAbi(compiledContract.abi);
-                const contract = new window.web3.eth.Contract(compiledContract.abi);
+                const contract = new window.web3.eth.Contract(compiledContract.abi, undefined, {transactionConfirmationBlocks: 1});
                 const activeAccount = window.accountManager.getActiveAccount();
                 GlobalEvent.$emit('processing', true);
 
                 contract.deploy({
                     data: compiledContract.evm.bytecode.object,
-                    arguments: params,
+                    arguments: params
                 }).send({
                     from: activeAccount.address,
                     gas: '4700000',

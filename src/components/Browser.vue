@@ -211,7 +211,7 @@
             refreshFileState: function() {
                 for(let key in this.messages) {
                     const message = this.messages[key];
-                    const file = this.findFile(this.files, message.sourceLocation.file);
+                    const file = this.findFile(this.files, message.sourceLocation.file.replace(/\\/g, '/'));
                     if(file != null) {
                         const newState = this.getStateFromSeverity(message.severity);
                         file.state = file.state < newState ? newState : file.state;
@@ -220,8 +220,8 @@
             },
             loadDirectory: function(path, directory, directoryComponent, index) {
                 const pathArr = path.split('/');
-                const dirPath = pathArr.splice(0, index++).join('/');
-                const dir = this.findDirectory(dirPath + '/', directory, 0, false);
+                const dirPath = pathArr.splice(0, index).join('/');
+                const dir = this.findDirectory(dirPath + '/', directory, index - 1, false);
                 if(dir) {
                     const subdirCmp = directoryComponent.$refs['directory_' + dir.path];
                     if(subdirCmp[0]) {
@@ -230,7 +230,7 @@
                                 this.select(this.findFile(this.files, localStorage['openFile']));
                             } else {
                                 setTimeout(() => {
-                                    this.loadDirectory(path, subdir, subdirCmp[0], index);
+                                    this.loadDirectory(path, subdir, subdirCmp[0], index + 1);
                                 }, 0);
                             }
                         });
@@ -295,7 +295,6 @@
                 const length = pathArr.length;
                 const name = pathArr[index++];
                 const dirPath = pathArr.splice(0, index).join('/');
-
 
                 for(let key in directory.childs) {
                     const dir = directory.childs[key];
