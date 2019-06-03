@@ -211,7 +211,7 @@
             refreshFileState: function() {
                 for(let key in this.messages) {
                     const message = this.messages[key];
-                    const file = this.findFile(this.files, message.sourceLocation.file);
+                    const file = this.findFile(this.files, message.sourceLocation.file.replace(/\\/g, '/'));
                     if(file != null) {
                         const newState = this.getStateFromSeverity(message.severity);
                         file.state = file.state < newState ? newState : file.state;
