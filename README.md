@@ -117,16 +117,3 @@ npm run server
 # Run vue.js server
 npm run serve
 ```
-
-## Donations
-
-I'm working on this project in my free time. I would be extremely grateful if you decide to support me on this project.
-
-![3JA17xTGW246yTVDwkXpqiitfJDTYWRFgV](.github/bitcoin.png)  
-
-
-**BTC**: 3JA17xTGW246yTVDwkXpqiitfJDTYWRFgV  
-
-## TODO
-
-- Dark-themed inputs

@@ -318,7 +318,7 @@ function listDirForCompile(dir, result) {
 
 function checkNotIgnored(dir) {
     for(let key in ignored) {
-        if(dir.endsWith(ignored)) {
+        if(dir.endsWith(ignored[key])) {
             return false
         }
     }
