@@ -15,8 +15,18 @@
             footer-bg-variant="dark" footer-text-variant="light"
             ok-variant="success" cancel-variant="primary"
         >
-            <p>
-                The following contracts have constructor parameters:
+            <p v-if="checkConstructorParametersVisible">
+                The following contract(s) have constructor parameters:
+            </p>
+            <p v-else>
+                Deploy the following contract(s):
+                <ul>
+                    <li
+                        v-for="contract in deployingContracts"
+                        v-bind:key="contract.id">
+                        {{ contract.name }}
+                    </li>
+                </ul>
             </p>
             <constructor-parameter
                 v-for="contract in deployingContracts"
@@ -52,7 +62,18 @@
                 errors: undefined,
                 defaultSession: null,
                 deployingContracts: [],
-                idIncrement: 0
+                idIncrement: 1
+            }
+        },
+        computed: {
+            checkConstructorParametersVisible: function() {
+                for(let key in this.deployingContracts) {
+                    const contract = this.deployingContracts[key];
+                    const ref = this.$refs['contractParams_' + contract.name + '_' + contract.id];
+                    if(ref && ref[0].visible)
+                        return true;
+                }
+                return false;
             }
         },
         methods: {
@@ -153,23 +174,7 @@
                     contract.id = this.idIncrement++;
                     this.deployingContracts.push(contract);
                 }
-
-                window.Vue.nextTick(function() {
-                    if(!this.checkConstructorParametersVisible()) {
-                        this.$refs.deployModal.hide();
-                        this.deployFile(files[this.fileName]);
-                    } else {
-                        this.$refs.deployModal.show();
-                    }
-                }.bind(this));
-            },
-            checkConstructorParametersVisible: function() {
-                for(let key in this.deployingContracts) {
-                    const contract = this.deployingContracts[key];
-                    if(this.$refs['contractParams_' + contract.name + '_' + contract.id][0].visible)
-                        return true;
-                }
-                return false;
+                this.$refs.deployModal.show();
             },
             clear: function() {
                 for(let key in this.sessions) {

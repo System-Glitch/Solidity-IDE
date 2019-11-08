@@ -82,7 +82,7 @@
                             this.setMessage(error);
                         });
                     } else {
-                        method.apply(null, params).send({value: data.amount, from: activeAccount.address, gas: 4700000})
+                        method.apply(null, params).send({value: data.method.payable !== true ? undefined : data.amount, from: activeAccount.address, gas: 4700000})
                         .then((result) => {
                             this.editor.getSession().setMode('ace/mode/json');
                             this.setMessage(JSON.stringify(result, null, 4));
