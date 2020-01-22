@@ -1,6 +1,6 @@
 {
   "name": "solidity-ide",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "private": false,
   "description": "A light and easy IDE for Solidity smart contract development.",
   "author": "SystemGlitch",
@@ -31,9 +31,9 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "express": "^4.17.1",
-    "ganache-cli": "^6.7.0",
+    "ganache-cli": "^6.8.2",
     "minimist": "^1.2.0",
-    "solc": "^0.5.12"
+    "solc": "^0.5.16"
   },
   "devDependencies": {
     "@vue/cli": "^3.12.1",
@@ -44,20 +44,20 @@
     "ace-mode-solidity": "^0.1.1",
     "axios": "^0.18.1",
     "babel-eslint": "^10.0.3",
-    "bootstrap": "^4.3.1",
-    "bootstrap-vue": "^2.0.4",
+    "bootstrap": "^4.4.1",
+    "bootstrap-vue": "^2.2.2",
     "brace": "^0.11.1",
-    "core-js": "^2.6.10",
+    "core-js": "^2.6.11",
     "es6-promise": "^4.2.8",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.2.3",
-    "node-sass": "^4.13.0",
+    "node-sass": "^4.13.1",
     "sass-loader": "^7.3.1",
     "split.js": "^1.5.11",
-    "vue": "^2.6.10",
-    "vue-template-compiler": "^2.6.10",
+    "vue": "^2.6.11",
+    "vue-template-compiler": "^2.6.11",
     "web3": "1.0.0-beta.55",
-    "webpack": "^4.41.2"
+    "webpack": "^4.41.5"
   },
   "eslintConfig": {
     "root": true,
