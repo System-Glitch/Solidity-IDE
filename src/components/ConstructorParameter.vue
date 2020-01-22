@@ -35,7 +35,7 @@
                 return placeholder;
             },
             value: function() {
-                return this.method.inputs.length ? '[' + this.params + ']' : '[]';
+                return this.method && this.method.inputs.length ? '[' + this.params + ']' : '[]';
             },
             visible: function() {
                 return this.method && this.method.inputs.length;
